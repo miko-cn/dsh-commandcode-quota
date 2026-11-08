@@ -188,13 +188,13 @@ window.__ModuleLoader__.load({
       .dcq-switch input{accent-color:var(--dsw-alias-brand-primary)}
 
       /* ---- floating capsule ---- */
-      .dcq-float{position:fixed;z-index:88;display:flex;align-items:center;gap:8px;height:40px;padding:0 13px 0 10px;border-radius:999px;cursor:grab;
+      .dcq-float{position:fixed;z-index:88;display:flex;align-items:center;gap:7px;height:38px;padding:0 12px 0 9px;border-radius:999px;cursor:grab;
         background:var(--dsw-alias-bg-overlay);border:1px solid var(--dsw-alias-border-l2);box-shadow:0 6px 20px rgba(0,0,0,.18);
         color:var(--dsw-alias-label-primary);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:12.5px;font-weight:600;touch-action:none;user-select:none}
       .dcq-float:active{cursor:grabbing}
       .dcq-float[data-dragging="1"]{box-shadow:0 10px 28px rgba(0,0,0,.3);opacity:.96}
-      .dcq-float-mark{width:24px;height:24px;display:grid;place-items:center;flex:none}
-      .dcq-float-mark img{border-radius:7px}
+      .dcq-float-mark{width:20px;height:20px;display:grid;place-items:center;flex:none}
+      .dcq-float-mark img{border-radius:6px}
       .dcq-float-plan{font-weight:750;letter-spacing:.2px}
       .dcq-float-meter{display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--dsw-alias-label-secondary);font-variant-numeric:tabular-nums}
       .dcq-float-track{width:34px;height:4px;border-radius:999px;background:var(--dsw-alias-bg-layer-2);overflow:hidden}
@@ -210,8 +210,8 @@ window.__ModuleLoader__.load({
         background:var(--dsw-alias-bg-overlay);color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);
         border-radius:14px;box-shadow:0 14px 36px rgba(0,0,0,.24);padding:12px 13px;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:13px}
       .dcq-pop-head{display:flex;align-items:center;gap:8px}
-      .dcq-pop-title{font-weight:700;font-size:13px}
-      .dcq-pop-sub{font-size:10.5px;color:var(--dsw-alias-label-secondary)}
+      .dcq-pop-title{font-weight:700;font-size:13.5px}
+      .dcq-pop-sub{font-size:11px;color:var(--dsw-alias-label-secondary)}
       .dcq-pop-spacer{flex:1}
       .dcq-pop .dcq-icon-btn{width:24px;height:24px;border:0;border-radius:7px;background:transparent;color:var(--dsw-alias-label-secondary);cursor:pointer;display:grid;place-items:center;font-size:13px;line-height:1}
       .dcq-pop .dcq-icon-btn:hover{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}
@@ -804,7 +804,7 @@ window.__ModuleLoader__.load({
       const clamp = (left, top) => {
         const width = capsule.current ? capsule.current.offsetWidth : 160
         const maxLeft = Math.max(8, window.innerWidth - width - 8)
-        const maxTop = Math.max(8, window.innerHeight - 48 - 8)
+        const maxTop = Math.max(8, window.innerHeight - 46 - 8)
         return { left: Math.min(Math.max(8, left), maxLeft), top: Math.min(Math.max(8, top), maxTop) }
       }
 
@@ -911,7 +911,7 @@ window.__ModuleLoader__.load({
               }
             },
           },
-          h('span', { className: 'dcq-float-mark' }, h(Icon, { size: 24 })),
+          h('span', { className: 'dcq-float-mark' }, h(Icon, { size: 20 })),
           h('span', { className: 'dcq-float-plan' }, plan && plan.name ? plan.name : 'CC'),
           five
             ? h(
@@ -947,7 +947,7 @@ window.__ModuleLoader__.load({
                 h(
                   'div',
                   { className: 'dcq-pop-head' },
-                  h('span', { style: { display: 'grid', placeItems: 'center', width: 24, height: 24 } }, h(Icon, { size: 20 })),
+                  h('span', { style: { display: 'grid', placeItems: 'center', width: 30, height: 30 } }, h(Icon, { size: 28 })),
                   h(
                     'div',
                     { style: { minWidth: 0 } },
