@@ -195,28 +195,69 @@ window.__ModuleLoader__.load({
       .dcq-switch{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12.5px}
       .dcq-switch input{accent-color:var(--dsw-alias-brand-primary)}
 
-      /* ---- floating capsule ---- */
-      .dcq-float{position:fixed;z-index:88;display:flex;align-items:center;gap:7px;height:38px;padding:0 12px 0 9px;border-radius:999px;cursor:grab;
-        background:var(--dsw-alias-bg-overlay);border:1px solid var(--dsw-alias-border-l2);box-shadow:0 6px 20px rgba(0,0,0,.18);
-        color:var(--dsw-alias-label-primary);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:12.5px;font-weight:600;touch-action:none;user-select:none}
+      /* ---- floating capsule: liquid-glass shell, logo + two progress rows ---- */
+      .dcq-float{position:fixed;z-index:88;display:flex;align-items:center;gap:10px;padding:9px 14px 9px 10px;border-radius:16px;cursor:grab;
+        background:var(--dsw-alias-bg-overlay);
+        background:
+          linear-gradient(152deg, rgba(255,255,255,.16), rgba(255,255,255,0) 44%, rgba(255,255,255,.05) 100%),
+          color-mix(in srgb, var(--dsw-alias-bg-overlay) 44%, transparent);
+        -webkit-backdrop-filter:blur(22px) saturate(200%) brightness(1.07) contrast(1.03);
+        backdrop-filter:blur(22px) saturate(200%) brightness(1.07) contrast(1.03);
+        border:1px solid rgba(255,255,255,.18);
+        box-shadow:
+          0 14px 36px rgba(0,0,0,.28),
+          0 2px 6px rgba(0,0,0,.16),
+          inset 0 1px 0 rgba(255,255,255,.32),
+          inset 0 -1px 0 rgba(0,0,0,.24),
+          inset 0 0 14px rgba(255,255,255,.05);
+        color:var(--dsw-alias-label-primary);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:10.5px;font-weight:600;touch-action:none;user-select:none}
+      .dcq-float::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+        background:radial-gradient(120% 80% at 18% 0%, rgba(255,255,255,.22), rgba(255,255,255,0) 58%)}
       .dcq-float:active{cursor:grabbing}
-      .dcq-float[data-dragging="1"]{box-shadow:0 10px 28px rgba(0,0,0,.3);opacity:.96}
-      .dcq-float-mark{width:20px;height:20px;display:grid;place-items:center;flex:none}
-      .dcq-float-mark img{border-radius:6px}
-      .dcq-float-plan{font-weight:750;letter-spacing:.2px}
-      .dcq-float-meter{display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--dsw-alias-label-secondary);font-variant-numeric:tabular-nums}
-      .dcq-float-track{width:34px;height:4px;border-radius:999px;background:var(--dsw-alias-bg-layer-2);overflow:hidden}
-      .dcq-float-fill{height:100%;border-radius:999px}
-      .dcq-float-pct{min-width:24px;text-align:right}
-      .dcq-float-dot{width:6px;height:6px;border-radius:50%;background:var(--dsw-alias-brand-primary);flex:none;transition:opacity .2s}
+      .dcq-float[data-dragging="1"]{box-shadow:0 16px 40px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.32);opacity:.97}
+      .dcq-float-mark{width:26px;height:26px;display:grid;place-items:center;flex:none}
+      .dcq-float-mark img{border-radius:7px;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+      .dcq-float-bars{display:flex;flex-direction:column;gap:6px;min-width:132px}
+      .dcq-float-row{display:flex;align-items:center;gap:7px;line-height:1;font-variant-numeric:tabular-nums}
+      .dcq-float-tag{width:18px;flex:none;color:var(--dsw-alias-label-secondary);font-size:9.5px;font-weight:700;letter-spacing:.3px;text-align:left}
+      .dcq-float-track{flex:1;height:7px;border-radius:999px;background:color-mix(in srgb, var(--dsw-alias-bg-base) 55%, transparent);overflow:hidden;box-shadow:inset 0 1px 1px rgba(0,0,0,.2)}
+      .dcq-float-fill{display:block;height:100%;border-radius:999px;transition:width .5s ease;box-shadow:0 0 8px rgba(18,184,134,.45)}
+      .dcq-float-pct{min-width:27px;text-align:right;color:var(--dsw-alias-label-secondary);font-size:10px}
+      .dcq-float-credit{font-size:11px;color:var(--dsw-alias-label-secondary);font-variant-numeric:tabular-nums;white-space:nowrap}
+      .dcq-float-dot{width:5px;height:5px;border-radius:50%;background:var(--dsw-alias-brand-primary);flex:none;transition:opacity .2s;box-shadow:0 0 8px rgba(18,184,134,.6)}
       .dcq-float-dot[data-loading="1"]{animation:dcq-pulse 1s ease-in-out infinite}
       @keyframes dcq-pulse{0%,100%{opacity:1}50%{opacity:.25}}
 
-      /* ---- popover ---- */
+      /* ---- popover: deeper glass shell ---- */
       .dcq-pop{position:fixed;z-index:89;width:320px;max-height:min(70vh,540px);overflow-y:auto;overflow-x:hidden;
         display:flex;flex-direction:column;gap:9px;
-        background:var(--dsw-alias-bg-overlay);color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);
-        border-radius:14px;box-shadow:0 14px 36px rgba(0,0,0,.24);padding:12px 13px;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:13px}
+        background:var(--dsw-alias-bg-overlay);
+        background:
+          linear-gradient(150deg, rgba(255,255,255,.13), rgba(255,255,255,0) 34%, rgba(255,255,255,0) 70%, rgba(255,255,255,.05) 100%),
+          color-mix(in srgb, var(--dsw-alias-bg-overlay) 62%, transparent);
+        -webkit-backdrop-filter:blur(34px) saturate(210%) brightness(1.06) contrast(1.02);
+        backdrop-filter:blur(34px) saturate(210%) brightness(1.06) contrast(1.02);
+        color:var(--dsw-alias-label-primary);
+        border:1px solid rgba(255,255,255,.14);
+        border-radius:18px;
+        box-shadow:
+          0 30px 80px rgba(0,0,0,.38),
+          0 4px 14px rgba(0,0,0,.22),
+          inset 0 1px 0 rgba(255,255,255,.24),
+          inset 0 -1px 0 rgba(0,0,0,.20);
+        padding:12px 13px;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:13px}
+      .dcq-pop::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+        background:radial-gradient(130% 70% at 14% 0%, rgba(255,255,255,.18), rgba(255,255,255,0) 60%)}
+      .dcq-pop .dcq-card{background:color-mix(in srgb, var(--dsw-alias-bg-layer-1) 46%, transparent);
+        border-color:rgba(255,255,255,.10)}
+      .dcq-pop .dcq-stat{background:color-mix(in srgb, var(--dsw-alias-bg-layer-1) 34%, transparent);
+        border-color:rgba(255,255,255,.08)}
+      @supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+        .dcq-float{background:var(--dsw-alias-bg-overlay)}
+        .dcq-pop{background:var(--dsw-alias-bg-overlay)}
+        .dcq-pop .dcq-card{background:var(--dsw-alias-bg-layer-1)}
+        .dcq-pop .dcq-stat{background:var(--dsw-alias-bg-layer-1)}
+      }
       .dcq-pop-head{display:flex;align-items:center;gap:8px}
       .dcq-pop-title{font-weight:700;font-size:13.5px}
       .dcq-pop-sub{font-size:11px;color:var(--dsw-alias-label-secondary)}
@@ -822,14 +863,14 @@ window.__ModuleLoader__.load({
       const clamp = (left, top) => {
         const width = capsule.current ? capsule.current.offsetWidth : 160
         const maxLeft = Math.max(8, window.innerWidth - width - 8)
-        const maxTop = Math.max(8, window.innerHeight - 46 - 8)
+        const maxTop = Math.max(8, window.innerHeight - 58 - 8)
         return { left: Math.min(Math.max(8, left), maxLeft), top: Math.min(Math.max(8, top), maxTop) }
       }
 
       // Restore the saved position, or start above the sidebar footer.
       React.useEffect(() => {
         const saved = store.position
-        const pos = saved ? clamp(saved.left, saved.top) : clamp(window.innerWidth - 210, window.innerHeight - 96)
+        const pos = saved ? clamp(saved.left, saved.top) : clamp(window.innerWidth - 240, window.innerHeight - 110)
         store.set({ position: pos })
         const onResize = () => store.set({ position: clamp(store.position.left, store.position.top) })
         window.addEventListener('resize', onResize)
@@ -890,7 +931,6 @@ window.__ModuleLoader__.load({
       const five = windows && windows.fiveHour
       const week = windows && windows.weekly
       const credit = report && report.credits
-      const plan = report && report.plan
 
       const popPos = (() => {
         if (!store.popoverOpen || !capsule.current) return null
@@ -929,29 +969,44 @@ window.__ModuleLoader__.load({
               }
             },
           },
-          h('span', { className: 'dcq-float-mark' }, h(Icon, { size: 20 })),
-          h('span', { className: 'dcq-float-plan' }, plan && plan.name ? plan.name : 'CC'),
-          five
-            ? h(
-                'span',
-                { className: 'dcq-float-meter' },
-                h('span', null, '5h'),
-                h('span', { className: 'dcq-float-track' }, h('span', { className: 'dcq-float-fill', style: { width: `${Math.max(3, Math.min(100, five.percent || 0))}%`, background: toneVar(five.percent) } })),
-                h('span', { className: 'dcq-float-pct' }, `${Math.round(five.percent || 0)}%`),
-              )
-            : null,
-          week
-            ? h(
-                'span',
-                { className: 'dcq-float-meter' },
-                h('span', null, 'W'),
-                h('span', { className: 'dcq-float-track' }, h('span', { className: 'dcq-float-fill', style: { width: `${Math.max(3, Math.min(100, week.percent || 0))}%`, background: toneVar(week.percent) } })),
-                h('span', { className: 'dcq-float-pct' }, `${Math.round(week.percent || 0)}%`),
-              )
-            : null,
-          !five && credit
-            ? h('span', { className: 'dcq-float-meter' }, h('span', null, `${credits(credit.remaining)} ${tr('remaining')}`))
-            : null,
+          h('span', { className: 'dcq-float-mark' }, h(Icon, { size: 26 })),
+          h(
+            'span',
+            { className: 'dcq-float-bars' },
+            five
+              ? h(
+                  'span',
+                  { className: 'dcq-float-row' },
+                  h('span', { className: 'dcq-float-tag' }, '5h'),
+                  h(
+                    'span',
+                    { className: 'dcq-float-track' },
+                    h('span', { className: 'dcq-float-fill', style: { width: `${Math.max(3, Math.min(100, five.percent || 0))}%`, background: toneVar(five.percent) } }),
+                  ),
+                  h('span', { className: 'dcq-float-pct' }, `${Math.round(five.percent || 0)}%`),
+                )
+              : null,
+            week
+              ? h(
+                  'span',
+                  { className: 'dcq-float-row' },
+                  h('span', { className: 'dcq-float-tag' }, 'W'),
+                  h(
+                    'span',
+                    { className: 'dcq-float-track' },
+                    h('span', { className: 'dcq-float-fill', style: { width: `${Math.max(3, Math.min(100, week.percent || 0))}%`, background: toneVar(week.percent) } }),
+                  ),
+                  h('span', { className: 'dcq-float-pct' }, `${Math.round(week.percent || 0)}%`),
+                )
+              : null,
+            !five && !week && credit
+              ? h(
+                  'span',
+                  { className: 'dcq-float-row' },
+                  h('span', { className: 'dcq-float-credit' }, `${credits(credit.remaining)} / ${credits(credit.total)}`),
+                )
+              : null,
+          ),
           h('span', { className: 'dcq-float-dot', 'data-loading': store.refreshing || store.loading ? '1' : '0' }),
         ),
         store.popoverOpen && popPos

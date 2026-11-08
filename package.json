@@ -1,6 +1,6 @@
 {
   "name": "@yumiku/dsh-commandcode-quota",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "type": "module",
   "description": "Command Code usage panel for DeepSeek Harness: plan credits, 5-hour/weekly windows, period request stats, plan tiers, and an API key editor — as a Settings tab plus a draggable floating capsule.",
   "license": "MIT",

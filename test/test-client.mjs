@@ -213,7 +213,7 @@ await new Promise((resolve) => setTimeout(resolve, 30))
 const floatTree = paint(floating)
 const floatText = collectText(floatTree)
 console.log('capsule text:', floatText)
-for (const expected of ['GOAT', '5h', 'W', '5%']) {
+for (const expected of ['5h', 'W', '5%']) {
   if (!floatText.includes(expected)) throw new Error(`capsule is missing ${expected}`)
 }
 
