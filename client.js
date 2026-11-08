@@ -62,7 +62,6 @@ window.__ModuleLoader__.load({
       button: 'Command Code',
       title: 'Command Code',
       credit: '套餐额度',
-      remaining: '剩余',
       usedOf: '已用',
       renew: '续费',
       windows: '用量窗口',
@@ -133,12 +132,12 @@ window.__ModuleLoader__.load({
       starCta: '在 GitHub 上 Star',
       autoRefresh: '本页每分钟自动刷新',
       periodRange: '本期',
+      creditsUnit: 'credits',
     }
     const en = {
       button: 'Command Code',
       title: 'Command Code',
       credit: 'Plan credits',
-      remaining: 'remaining',
       usedOf: 'used',
       renew: 'renews',
       windows: 'Usage windows',
@@ -206,6 +205,7 @@ window.__ModuleLoader__.load({
       expand: 'Expand',
       autoRefresh: 'This page refreshes every minute',
       periodRange: 'Cycle',
+      creditsUnit: 'credits',
       starTitle: 'Enjoying this plugin?',
       starBody: 'It is open source on GitHub — a star helps a lot.',
       starCta: 'Star on GitHub',
@@ -672,7 +672,7 @@ window.__ModuleLoader__.load({
           'div',
           { className: 'dcq-meta' },
           h('span', { style: { fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, label),
-          h('span', null, `${credits(data.used)} / ${credits(data.cap)}`),
+          h('span', null, `${credits(data.used)} / ${credits(data.cap)} ${tr('creditsUnit')}`),
         ),
         h(Bar, { percent, height: compactMode ? 6 : 8 }),
         h(
@@ -813,7 +813,7 @@ window.__ModuleLoader__.load({
           ? h(
               'div',
               { className: 'dcq-meta', style: { marginTop: 8 } },
-              h('span', null, `${tr('planCaps')} ${credits(plan.fiveHourCap)} / ${credits(plan.weeklyCap)}`),
+              h('span', null, `${tr('planCaps')} ${credits(plan.fiveHourCap)} / ${credits(plan.weeklyCap)} ${tr('creditsUnit')}`),
               h('span', null, plan.source === 'override' ? tr('planOverride') : tr('planAuto')),
             )
           : h('div', { className: 'dcq-meta', style: { marginTop: 8 } }, tr('planAuto')),
@@ -837,13 +837,13 @@ window.__ModuleLoader__.load({
             'div',
             { className: 'dcq-bigline' },
             h('span', { className: 'dcq-big', style: { color: toneVar(credit && credit.percent) } }, credits(credit && credit.remaining)),
-            credit && credit.total ? h('span', { className: 'dcq-big-unit' }, `/ ${credits(credit.total)} ${tr('remaining')}`) : null,
+            credit && credit.total ? h('span', { className: 'dcq-big-unit' }, `/ ${credits(credit.total)} ${tr('creditsUnit')}`) : null,
           ),
           h(Bar, { percent: credit && credit.percent }),
           h(
             'div',
             { className: 'dcq-meta' },
-            h('span', null, `${tr('usedOf')} ${credits(credit && credit.used)} / ${credits(credit && credit.total)}`),
+            h('span', null, `${tr('usedOf')} ${credits(credit && credit.used)} / ${credits(credit && credit.total)} ${tr('creditsUnit')}`),
             h('span', null, credit && credit.percent !== null && credit.percent !== undefined ? `${credit.percent}%` : ''),
           ),
           summary && summary.periodEnd
@@ -864,7 +864,7 @@ window.__ModuleLoader__.load({
                 'div',
                 { className: 'dcq-meta', style: { marginTop: 4 } },
                 h('span', null, tr('extraCredits')),
-                h('span', null, `${credits(credit.purchased || 0)} + ${credits(credit.free || 0)}`),
+                h('span', null, `${credits(credit.purchased || 0)} + ${credits(credit.free || 0)} ${tr('creditsUnit')}`),
               )
             : null,
         ),
