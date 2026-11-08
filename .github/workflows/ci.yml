@@ -38,5 +38,9 @@ jobs:
           "
       - name: Client smoke test
         run: node test/test-client.mjs
+      - name: Install dev dependencies
+        run: npm install --no-audit --no-fund --no-package-lock
+      - name: Validate the Discover index
+        run: npm run validate:index
       - name: Pack dry run
         run: npm pack --dry-run

@@ -65,6 +65,21 @@ https://github.com/miko-cn/dsh-commandcode-quota/releases/latest/download/dsh-co
 
 设置里出现「Command Code」页签，桌面上出现浮窗胶囊。
 
+### 用自建 Discover 索引安装（不依赖任何市场）
+
+仓库自带一份 **format-1 插件市场索引** [`market/index.json`](market/index.json)，可以在 DSH 的 Discover 页签里直接订阅：
+
+1. DSH → **Plugins → Discover → Manage index sources**
+2. 添加：
+
+   ```text
+   https://raw.githubusercontent.com/miko-cn/dsh-commandcode-quota/main/market/index.json
+   ```
+
+3. 在 Discover 里搜索 “Command Code”，选版本安装（安装参数是 `@yumiku/dsh-commandcode-quota@1.0.2`）。
+
+索引由 [`scripts/build-index.mjs`](scripts/build-index.mjs) 从根 `package.json` 和 npm 发版时间生成，并用官方 `@deepseek-ai/dsh-plugin-market-index` 校验过。发新版本后重跑一次脚本即可；新增插件时在同一份索引里加一条。
+
 ## 面板里都有什么
 
 ### 套餐额度
@@ -161,6 +176,7 @@ $env:SHARP_PATH='<path-to-node_modules>/sharp'; node scripts/make-assets.mjs
 - **CI**：push / PR 跑语法检查、manifest 校验、客户端冒烟测试、`npm pack --dry-run`
 - **Release**：推 `v*` 标签自动 `npm pack` 并创建 GitHub Release，资产名固定为 `dsh-commandcode-quota.tgz`
 - **插件市场**：投稿草稿见 [`marketplace/awesome-dsh-plugin.yml`](marketplace/awesome-dsh-plugin.yml)
+- **自建 Discover 索引**：`market/index.json`（`node scripts/build-index.mjs` 生成），用户可在 Plugins → Discover 里添加该 URL
 
 ## 已知限制
 

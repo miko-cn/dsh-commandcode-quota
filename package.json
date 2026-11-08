@@ -43,6 +43,13 @@
     "README.md",
     "LICENSE"
   ],
+  "scripts": {
+    "build:index": "node scripts/build-index.mjs",
+    "validate:index": "node scripts/validate-index.mjs"
+  },
+  "devDependencies": {
+    "@deepseek-ai/dsh-plugin-market-index": "^0.2.1-alpha.4"
+  },
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
