@@ -1,0 +1,18 @@
+# Submission draft for github.com/awesome-dsh-plugin/awesome-dsh-plugin
+#
+# Open a PR adding exactly one file:
+#   data/plugins/miko-cn__dsh-commandcode-quota.yml
+# with the content below. CI checks that this repo's package.json declares
+# `dsh.bundle`, that the repository is at least one day old, and that the icon
+# is a GitHub-hosted raster image. npm publishing is optional and picked up
+# automatically from the published package's `repository` field.
+#
+# The `name` / `url` below must match the GitHub repository exactly; update both
+# here and in package.json if the repository is renamed before submission.
+url: https://github.com/miko-cn/dsh-commandcode-quota
+name: miko-cn/dsh-commandcode-quota
+category: usage
+description:
+  en: 'Command Code usage panel for DeepSeek Harness: plan credits, 5-hour and weekly windows, per-period request stats, plan tiers, and an in-app API key editor, delivered as a Settings tab plus a draggable floating capsule.'
+  zh: 'DSH 里的 Command Code 用量面板：套餐额度、5 小时 / 每周窗口、本期请求统计、套餐档位与内置 API key 编辑，包含设置页与可拖动浮窗。'
+icon: https://raw.githubusercontent.com/miko-cn/dsh-commandcode-quota/main/icon.png

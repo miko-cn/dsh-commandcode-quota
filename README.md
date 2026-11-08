@@ -76,7 +76,13 @@ node test/test-client.mjs           # 桩浏览器环境加载 Client 半：槽�
 
 - 逐条请求明细只存在于 Command Code Studio 的登录会话接口（`/internal/usage*`，需要网页 cookie），API key 拿不到，所以面板只做本期汇总。
 - `/alpha/*` 是 CLI 内部接口，未在公开文档中承诺稳定性；字段缺失时面板会降级显示而不是报错。
-- 发布状态：npm 上 `dsh-commandcode-quota` 这个包名已被他人占用，正式发布前需要换名（计划使用 `@miko-cn/...` 或新的不带冲突的名字），代码内的包名 / 行 id / 客户端模块 id 需要同步改名。
+
+## 发布状态
+
+- **GitHub**：仓库已公开（2026-11-08 创建）。市场要求仓库创建满 1 天方可提交。
+- **npm**：`dsh-commandcode-quota` 这个包名已被他人占用（fuqiancheng，同名同用途插件已在市场 `usage` 分类里）。正式发布前需要换名，候选：`@miko-cn/dsh-commandcode-quota`（scoped，需 npm 登录）或 `dsh-commandcode-quota-panel`、`dsh-commandcode-panel`、`commandcode-quota-dsh`（均有空闲）。改名的同时需要同步 `package.json` 的 `name`、`cordis.patch.yml` 的行 `name`、`client.js` 的 `__ModuleLoader__.load({ id })`，然后重新安装。
+- **插件市场**：`awesome-dsh-plugin` 用「一个插件一个 YAML」的方式投稿，草稿见 [`marketplace/awesome-dsh-plugin.yml`](marketplace/awesome-dsh-plugin.yml)。它与已有的 `fuqiancheng/dsh-commandcode-quota` 功能重叠，评审时需要在描述里讲清差异（设置页 + 可拖动浮窗 + 档位选择 + 内置 key 编辑）。
+- 截图：市场详情页支持 `screenshots.json`（1–8 张仓库内图片），目前还没有，需要人工在真实页面上截取。
 
 ## License
 
