@@ -10,7 +10,7 @@
  * browser (only its status).
  */
 window.__ModuleLoader__.load({
-  id: '@local/commandcode-quota',
+  id: '@yumiku/dsh-commandcode-quota',
   factory(require) {
     const React = require('react')
     const h = React.createElement

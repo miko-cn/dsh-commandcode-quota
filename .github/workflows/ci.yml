@@ -1,0 +1,42 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax check
+        run: |
+          node --check index.js
+          node --check client.js
+      - name: Manifest checks
+        run: |
+          node -e "
+            const p = require('./package.json');
+            const fail = (m) => { console.error(m); process.exit(1) };
+            if (!p.dsh || !p.dsh.bundle || !p.dsh.bundle.patch) fail('missing dsh.bundle.patch');
+            if (!p.exports || !p.exports['./client']) fail('missing ./client export');
+            if (!p.exports['./icon']) fail('missing ./icon export');
+            const fs = require('fs');
+            for (const file of [p.icon, 'cordis.patch.yml', 'index.js', 'client.js']) {
+              if (!fs.existsSync(file)) fail('missing ' + file);
+            }
+            const icon = fs.statSync(p.icon);
+            if (icon.size > 256 * 1024) fail('icon exceeds 256 KiB');
+            console.log('manifest ok:', p.name + '@' + p.version);
+          "
+      - name: Client smoke test
+        run: node test/test-client.mjs
+      - name: Pack dry run
+        run: npm pack --dry-run

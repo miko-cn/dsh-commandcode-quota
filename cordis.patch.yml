@@ -1,8 +1,8 @@
-# Bundle patch: inserts the plugin row that provides the sidebar "Command Code" panel.
+# Bundle patch: inserts the plugin row that provides the Command Code panel.
 # The user's own patch layer may override this config later.
 - insert:
     - id: commandcode-quota
-      name: '@local/commandcode-quota'
+      name: '@yumiku/dsh-commandcode-quota'
       config:
         apiBase: https://api.commandcode.ai
         apiKeyEnv: COMMAND_CODE_API_KEY

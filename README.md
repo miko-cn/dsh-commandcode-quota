@@ -45,15 +45,21 @@ Command Code 用量面板，DeepSeek Harness（DSH）Web UI 插件。
 
 ## 安装
 
-- 本仓库 `git clone` 到本机，例如 `D:\Workspace\dsh-commandcode-quota`
-- 在 DSH 会话里用 `plugin_manager` 的 `install_bundle`，`target` 指向该绝对路径
-- 刷新页面；设置里出现「Command Code」页签，桌面上出现浮窗胶囊
+- **npm（推荐）**：
+
+  ```pwsh
+  dsh plugin --profile <profile> add @yumiku/dsh-commandcode-quota
+  ```
+
+  或用 DSH 会话里的 `plugin_manager`：`install_bundle`，`target` 填 `@yumiku/dsh-commandcode-quota`。
+- 本地联调：把仓库 clone 到本机（如 `D:\Workspace\dsh-commandcode-quota`），`install_bundle` 的 `target` 指向该绝对路径。
+- 装好后刷新页面：设置里出现「Command Code」页签，桌面上出现浮窗胶囊。
 
 ## 配置
 
 ```yaml
 - id: commandcode-quota
-  name: '@local/commandcode-quota'
+  name: '@yumiku/dsh-commandcode-quota'
   config:
     apiKey: ''                 # 留空则按上面的顺序自动查找（推荐用设置页写入凭据库）
     apiKeyEnv: COMMAND_CODE_API_KEY
@@ -77,11 +83,12 @@ node test/test-client.mjs           # 桩浏览器环境加载 Client 半：槽�
 - 逐条请求明细只存在于 Command Code Studio 的登录会话接口（`/internal/usage*`，需要网页 cookie），API key 拿不到，所以面板只做本期汇总。
 - `/alpha/*` 是 CLI 内部接口，未在公开文档中承诺稳定性；字段缺失时面板会降级显示而不是报错。
 
-## 发布状态
+## 发布
 
-- **GitHub**：仓库已公开（2026-11-08 创建）。市场要求仓库创建满 1 天方可提交。
-- **npm**：`dsh-commandcode-quota` 这个包名已被他人占用（fuqiancheng，同名同用途插件已在市场 `usage` 分类里）。正式发布前需要换名，候选：`@miko-cn/dsh-commandcode-quota`（scoped，需 npm 登录）或 `dsh-commandcode-quota-panel`、`dsh-commandcode-panel`、`commandcode-quota-dsh`（均有空闲）。改名的同时需要同步 `package.json` 的 `name`、`cordis.patch.yml` 的行 `name`、`client.js` 的 `__ModuleLoader__.load({ id })`，然后重新安装。
-- **插件市场**：`awesome-dsh-plugin` 用「一个插件一个 YAML」的方式投稿，草稿见 [`marketplace/awesome-dsh-plugin.yml`](marketplace/awesome-dsh-plugin.yml)。它与已有的 `fuqiancheng/dsh-commandcode-quota` 功能重叠，评审时需要在描述里讲清差异（设置页 + 可拖动浮窗 + 档位选择 + 内置 key 编辑）。
+- **npm**：`@yumiku/dsh-commandcode-quota`，公开包（`publishConfig.access = public`）。版本号从 `1.0.0` 开始。
+- **GitHub CI**：`ci` 工作流在 push / PR 时跑语法检查、manifest（`dsh.bundle` / `./client` / 图标大小）校验、客户端冒烟测试和 `npm pack --dry-run`。
+- **Release**：推 `v*` 标签时 `release` 工作流会 `npm pack` 并创建 GitHub Release，资产名固定为 `dsh-commandcode-quota.tgz`（不带版本号，避免 `releases/latest/download/...` 链接随版本失效）。
+- **插件市场**：`awesome-dsh-plugin` 用「一个插件一个 YAML」投稿，草稿见 [`marketplace/awesome-dsh-plugin.yml`](marketplace/awesome-dsh-plugin.yml)；仓库创建满 1 天后可提 PR。它与已有的 `fuqiancheng/dsh-commandcode-quota` 功能重叠，评审时突出差异（设置页 + 可拖动浮窗 + 档位选择 + 内置 key 编辑）。
 - 截图：市场详情页支持 `screenshots.json`（1–8 张仓库内图片），目前还没有，需要人工在真实页面上截取。
 
 ## License

@@ -111,7 +111,7 @@ globalThis.window = {
 globalThis.document = documentStub
 
 await import(new URL('../client.js', import.meta.url).href)
-if (!loaded || loaded.id !== '@local/commandcode-quota') throw new Error('module did not register with the expected id')
+if (!loaded || loaded.id !== '@yumiku/dsh-commandcode-quota') throw new Error('module did not register with the expected id')
 
 const registrations = []
 const ctx = {
