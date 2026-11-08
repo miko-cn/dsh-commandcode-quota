@@ -75,6 +75,10 @@ window.__ModuleLoader__.load({
       apiKeyConfigured: '已配置',
       apiKeyMissing: '未配置',
       apiKeySource: '来源',
+      srcFile: 'DSH 凭据库',
+      srcEnv: '环境变量',
+      srcConfig: '插件配置',
+      srcCli: 'cmd CLI 登录',
       apiKeyWritable: '可在此处修改',
       apiKeyReadonly: '来自只读来源',
       widget: '浮窗',
@@ -133,6 +137,10 @@ window.__ModuleLoader__.load({
       apiKeyConfigured: 'configured',
       apiKeyMissing: 'not configured',
       apiKeySource: 'source',
+      srcFile: 'DSH credential store',
+      srcEnv: 'environment variable',
+      srcConfig: 'plugin config',
+      srcCli: 'cmd CLI login',
       apiKeyWritable: 'editable here',
       apiKeyReadonly: 'read-only source',
       widget: 'Floating widget',
@@ -174,7 +182,7 @@ window.__ModuleLoader__.load({
       .dcq-link:hover{text-decoration:underline}
       .dcq-btn{padding:5px 14px;border:1px solid var(--dsw-alias-border-l2);border-radius:8px;background:transparent;color:var(--dsw-alias-label-primary);font:inherit;font-size:12px;cursor:pointer}
       .dcq-btn:hover{background:var(--dsw-alias-bg-layer-2)}
-      .dcq-btn-primary{border-color:transparent;background:var(--dsw-alias-brand-primary);color:#fff}
+      .dcq-btn-primary{border-color:transparent;background:var(--dsw-alias-brand-primary);color:var(--dsw-alias-bg-base);font-weight:600}
       .dcq-btn-primary:hover{filter:brightness(1.08);background:var(--dsw-alias-brand-primary)}
       .dcq-btn:disabled{opacity:.5;cursor:default}
       .dcq-input{flex:1;min-width:0;padding:7px 10px;border:1px solid var(--dsw-alias-border-l2);border-radius:8px;background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);font:inherit;font-size:12.5px}
@@ -491,6 +499,16 @@ window.__ModuleLoader__.load({
       )
     }
 
+    function sourceLabel(source, tr) {
+      if (!source) return ''
+      const text = String(source).toLowerCase()
+      if (text.includes('file')) return tr('srcFile')
+      if (text.includes('env')) return tr('srcEnv')
+      if (text.includes('config')) return tr('srcConfig')
+      if (text.includes('auth.json') || text.includes('cli')) return tr('srcCli')
+      return source
+    }
+
     function KeyCard({ tr }) {
       useStore()
       const [draft, setDraft] = React.useState('')
@@ -515,7 +533,7 @@ window.__ModuleLoader__.load({
         h(
           'div',
           { className: 'dcq-note' },
-          status && status.source ? `${tr('apiKeySource')}: ${status.source}` : '',
+          status && status.source ? `${tr('apiKeySource')}: ${sourceLabel(status.source, tr)}` : '',
           status && status.writable ? ` · ${tr('apiKeyWritable')}` : status && status.configured ? ` · ${tr('apiKeyReadonly')}` : '',
         ),
         h(
