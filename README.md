@@ -5,6 +5,14 @@
 <h1 align="center">Command Code 用量面板</h1>
 
 <p align="center">
+  在 DeepSeek Harness 里，一眼看到 Command Code 的额度、窗口和请求量。
+</p>
+
+<p align="center">
+  <b>简体中文</b> · <a href="README.en.md">English</a>
+</p>
+
+<p align="center">
   <a href="https://www.npmjs.com/package/@yumiku/dsh-commandcode-quota"><img alt="npm" src="https://img.shields.io/npm/v/@yumiku/dsh-commandcode-quota?color=0ea97a" /></a>
   <a href="https://github.com/miko-cn/dsh-commandcode-quota/actions/workflows/ci.yml"><img alt="ci" src="https://github.com/miko-cn/dsh-commandcode-quota/actions/workflows/ci.yml/badge.svg" /></a>
   <img alt="dsh" src="https://img.shields.io/badge/dsh-%E2%89%A50.2.0-0ea97a" />
@@ -12,26 +20,20 @@
   <a href="https://github.com/deepseek-ai/deepseek-harness"><img alt="powered by dsh" src="https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square&logo=deepseek&logoColor=white" /></a>
 </p>
 
-<h3 align="center">在 DeepSeek Harness 里，直接看 Command Code 的额度、窗口和请求量。</h3>
-
-<p align="center">
-  一个设置页 · 一个可拖动的浮窗胶囊 · 9 档套餐识别 · 内置 API key 管理
-</p>
-
 ---
 
-## 亮点
+## 这是什么
 
-| | |
-| --- | --- |
-| 💳 **套餐额度** | 本期剩余 / 总额度、已用百分比、续费日期与距续费剩余时间，额外购买的额度单独列出 |
-| ⏱ **滚动窗口** | 5 小时与每周窗口的已用 / 上限 / 重置时刻与距重置剩余时间，实时值来自 Command Code 接口 |
-| 📊 **本期请求** | 请求数、成功率、花费、输入输出 token，打开即刷新、此后每分钟更新 |
-| 🎚 **套餐档位** | 自动按订阅识别 Go / GOAT / Pro / Max / Ultra / Teams Pro，也可手动指定 |
-| 🪟 **桌面浮窗** | 液态毛玻璃外壳的胶囊：Logo + 双行进度条，拖到任意位置，位置本地记忆，点开是完整浮层；启动即自动拉取数据（载入时显示骨架条，失败显示「读取失败」），切回 DSH 窗口也会刷新 |
-| 🔑 **API key** | 设置页直接填写 / 清除，写入 DSH 凭据库，不落配置文件、不下发浏览器 |
+如果你用 Command Code 跑模型，大概每天都会做同一件事：切到它的网站，看一眼「这个月还剩多少额度、5 小时窗口用了多少」。
 
-## 界面
+这个插件把这件事搬进 DSH：
+
+- **一个设置页**：额度、窗口、本期请求，一次看全；
+- **一个浮窗胶囊**：常驻在桌面上，双行进度条 + 倒计时，扫一眼就知道还剩多少；
+- 点一下胶囊展开完整面板，可以拖到屏幕任意位置；
+- 不用第二次登录，也不用离开 DSH。
+
+## 长什么样
 
 <p align="center">
   <img src="assets/preview-popover.png" alt="浮层与浮窗胶囊" width="46%" />
@@ -39,71 +41,107 @@
   <img src="assets/preview-settings.png" alt="设置页" width="52%" />
 </p>
 
-<p align="center"><sub>左：液态毛玻璃浮层 + 双行进度条浮窗胶囊 · 右：设置 → Command Code 页面</sub></p>
+<p align="center"><sub>左：点开胶囊后的面板 · 右：设置里的 Command Code 页面</sub></p>
 
-## 快速开始
+## 一分钟上手
 
-**1. 安装插件**
+### 1. 安装
 
 ```pwsh
 dsh plugin --profile <profile> add @yumiku/dsh-commandcode-quota
 ```
 
-或在 DSH 会话里用 `plugin_manager`：`install_bundle`，`target` 填 `@yumiku/dsh-commandcode-quota`。
-npm 尚未发布时，也可以直接装 GitHub Release 的预构建包：
+也可以在 DSH 会话里让 agent 用 `plugin_manager` 的 `install_bundle` 安装 `@yumiku/dsh-commandcode-quota`。
+
+### 2. 填 API key（多数人不需要）
+
+- 如果你用过 `cmd login`，或者 DSH 本身正在用 Command Code 当模型供应商，插件会自动复用，**跳过这步**。
+- 否则：**设置 → Command Code → API key**，粘贴一个 Command Code API key 保存即可。
+
+key 只存在 DSH 的凭据库里：不写配置文件，也不会发给浏览器页面。
+
+### 3. 刷新页面
+
+设置里会多出一个「Command Code」，桌面右下角会出现浮窗胶囊——直接拖到你喜欢的位置。
+
+<details>
+<summary>其他安装方式（GitHub Release / 自建索引）</summary>
+
+GitHub Release 的预构建包：
 
 ```text
 https://github.com/miko-cn/dsh-commandcode-quota/releases/latest/download/dsh-commandcode-quota.tgz
 ```
 
-**2. 配置 API key**
+如果启用了官方的「自定义插件索引 / Discover」，也可以把下面这个地址加进 **Plugins → Discover → Manage index sources**，然后在 Discover 里搜索安装：
 
-如果你已经用 `cmd login` 登录过，或者 DSH 正在用 Command Code 作为模型供应商（`COMMAND_API_KEY`），插件会自动复用，无需配置。
-否则打开 **设置 → Command Code → API key**，粘贴一个 Command Code API key 保存即可——密钥只写入 DSH 凭据库。
+```text
+https://raw.githubusercontent.com/miko-cn/dsh-commandcode-quota/main/market/index.json
+```
 
-**3. 刷新页面**
+</details>
 
-设置里出现「Command Code」页签，桌面上出现浮窗胶囊。
-
-### 用自建 Discover 索引安装（不依赖任何市场）
-
-仓库自带一份 **format-1 插件市场索引** [`market/index.json`](market/index.json)，可以在 DSH 的 Discover 页签里直接订阅：
-
-1. DSH → **Plugins → Discover → Manage index sources**
-2. 添加：
-
-   ```text
-   https://raw.githubusercontent.com/miko-cn/dsh-commandcode-quota/main/market/index.json
-   ```
-
-3. 在 Discover 里搜索 “Command Code”，选版本安装（安装参数是 `@yumiku/dsh-commandcode-quota@1.0.2`）。
-
-索引由 [`scripts/build-index.mjs`](scripts/build-index.mjs) 从根 `package.json` 和 npm 发版时间生成，并用官方 `@deepseek-ai/dsh-plugin-market-index` 校验过。发新版本后重跑一次脚本即可；新增插件时在同一份索引里加一条。
-
-## 面板里都有什么
+## 每个数字是什么意思
 
 ### 套餐额度
 
-Command Code 的月额度是一个池子，面板显示「剩余 / 总额度」和已用百分比。额度按月重置、不结转；额外购买的额度、赠送额度会单独显示。
+Command Code 的月额度是一个池子。面板显示「剩余 / 总额度」、已用百分比，以及**距离续费还剩多久**（比如「续费 12/3 · 还剩 25 天 1 小时」）。额度按月重置、不结转；额外买的额度、赠送的额度会单独列出。
 
 ### 5 小时 / 每周窗口
 
-Command Code 在月额度之上还有两个**滚动窗口**，用来限速：
+Command Code 除了月额度，还有两道「限速」：**任意 5 小时**、**任意 7 天**内最多能花多少。它们不是按自然日重置，而是从你第一笔请求开始计时。
 
-- **5 小时窗口**：任意 5 小时内最多能用多少 credits（GOAT 是 14）
-- **每周窗口**：任意 7 天内最多能用多少 credits（GOAT 是 35）
+浮窗和面板上的两行进度条就是这两个窗口，右边是实时倒计时：
 
-窗口**从你第一笔请求开始计时**，5 小时 / 7 天后整段归零，不是按自然日重置。面板显示每个窗口的已用、上限、重置时刻和百分比，并带一个实时倒计时：5 小时窗口用 `h m s`（如 `3h 12m 45s`，每秒跳动），每周窗口用 `d h m`（如 `2d 3h 12m`）；为 0 的高位会省略（如 `59m 59s`），数字加粗显示。`credits` 不等于美元：对全额额度模型 1 credit ≈ $1 用量，对高额度模型按倍率折算，所以同样的「14」在不同模型组合下对应的美元不同。
+- 5 小时窗口：`3h 12m 45s`（每秒跳动的是倒计时，不是数据刷新）
+- 每周窗口：`2d 3h 12m`
+
+高位为 0 会省略，比如只剩 59 分钟时显示 `59m 59s`。
 
 ### 本期请求
 
-按**计费周期**统计：请求数、成功率、花费、输入 / 输出 token。打开面板时强制刷新（绕过本地缓存），之后每分钟自动刷新一次；面板底部显示「更新于 X 秒前」。
+按计费周期统计：发了多少请求、成功率、花了多少钱、输入 / 输出 token 多少。打开面板时会强制刷新一次，之后每分钟自动更新；面板底部会显示「更新于 X 秒前」。
 
 ### 套餐档位
 
-插件内置 9 个档位（`individual-go`、`individual-goat`、`individual-pro`、`individual-max`、`individual-ultra`、`teams-pro`、`individual-provider` 等），默认从订阅的 `planId` 自动识别，档位表提供月额度与窗口上限的兜底值；窗口上限以接口实时返回为准。设置页可以手动切换档位（只影响显示与换算，不会改动你的订阅）。
+插件会自动识别你的套餐（Go / GOAT / Pro / Max / Ultra / Teams Pro），窗口上限以 Command Code 实时返回为准。设置页里也可以手动切换档位——只影响显示和换算，不会改动你的订阅。
+
+### 浮窗
+
+- 拖到任意位置，位置会记住；
+- 启动时自动加载（先显示骨架条，不会一直空着）；
+- 从别的窗口切回 DSH 时会自动刷新；
+- 不想看可以在设置页里关掉。
+
+## 常见问题
+
+**需要额外注册吗？**
+不用。用你原本的 Command Code 账号就行。
+
+**API key 会被上传吗？**
+不会。key 只在 DSH 的后台进程里使用，浏览器页面只拿到整理好的数字，拿不到 key 本身。
+
+**为什么 5 小时是 14、每周是 35？**
+这是 GOAT 套餐的窗口上限（单位是 credits）。不同档位的上限不一样，面板会显示你当前档位的实际值。credits 也不等于美元：对全额额度模型 1 credit ≈ $1 用量，对高额度模型按倍率折算。
+
+**数字和官网对不上？**
+面板按计费周期统计，官网可能有几分钟延迟；点击刷新或重新打开面板会强制拉取最新值。
+
+**浮窗不见了？**
+去 **设置 → Command Code**，把「显示桌面浮窗」重新打开。
+
+**启动时提示 `Failed to load plugins`？**
+这是 1.0.2 的已知问题（客户端服务没有声明 inject），1.0.4 起已修复；升级到最新版本即可。
+
+**会不会很耗接口？**
+打开面板时刷新一次，之后每分钟一次；浮窗后台每 5 分钟一次；页面不可见时不会请求。每轮会调 Command Code 的 4 个接口。
+
+**有英文界面吗？**
+有。界面文案跟随 DSH 的语言设置自动切换（内置中 / 英两套），这个 README 也有[英文版](README.en.md)。
 
 ## 配置
+
+平时不需要改。想调整的话，在 profile 的 `cordis.patch.yml` 里加：
 
 ```yaml
 - id: commandcode-quota
@@ -113,11 +151,12 @@ Command Code 在月额度之上还有两个**滚动窗口**，用来限速：
     apiKeyEnv: COMMAND_CODE_API_KEY
     apiBase: https://api.commandcode.ai
     planOverride: ''           # 默认档位，页面上的手动选择优先生效
-    cacheMs: 45000             # Host 侧缓存时长（打开面板时强制刷新）
+    cacheMs: 45000             # 后台缓存时长（打开面板时会强制刷新）
     timeoutMs: 12000
 ```
 
-### API key 解析顺序
+<details>
+<summary>API key 的查找顺序</summary>
 
 1. 设置页保存的 key（DSH 凭据库，`COMMAND_CODE_API_KEY`，优先于环境变量）
 2. 环境变量 `COMMAND_CODE_API_KEY`（`apiKeyEnv` 可改名）
@@ -125,7 +164,9 @@ Command Code 在月额度之上还有两个**滚动窗口**，用来限速：
 4. `~/.commandcode/auth.json`（`cmd login` 生成）
 5. `~/.dsh/.credentials.yaml`
 
-## 架构
+</details>
+
+## 它是怎么工作的
 
 ```mermaid
 flowchart LR
@@ -145,7 +186,7 @@ flowchart LR
   K --> R
 ```
 
-数据流很简单：Host 半拿着 API key 调 Command Code 的内部接口（与 `cmd` CLI 的 `/usage` 同源），整理成一份报表挂在同源路由上；客户端半只读报表，**永远拿不到 key**。两个路由都过 DSH 的请求门禁。
+DSH 的后台进程拿着 API key 去调 Command Code 的内部接口（和 `cmd` CLI 的 `/usage` 同源），整理成一份报表挂在同源路由上；网页只读报表。两个路由都走 DSH 的请求门禁。
 
 | 路由 | 作用 |
 | --- | --- |
@@ -155,7 +196,7 @@ flowchart LR
 
 ## 开发
 
-仓库是纯 JavaScript，无需构建：
+仓库是纯 JavaScript，没有构建步骤：
 
 ```pwsh
 node --check index.js
@@ -164,7 +205,7 @@ node test/test-client.mjs          # 桩浏览器环境：槽位注册、设置�
 node test/test-host.mjs <api-key>  # 真实接口：报表 + key 状态
 ```
 
-界面素材（banner、预览图）由 `scripts/make-assets.mjs` 渲染，需要 sharp：
+README 里的图片由 `scripts/make-assets.mjs` 渲染，需要 sharp：
 
 ```pwsh
 $env:SHARP_PATH='<path-to-node_modules>/sharp'; node scripts/make-assets.mjs
@@ -176,16 +217,14 @@ $env:SHARP_PATH='<path-to-node_modules>/sharp'; node scripts/make-assets.mjs
 - **CI**：push / PR 跑语法检查、manifest 校验、客户端冒烟测试、`npm pack --dry-run`
 - **Release**：推 `v*` 标签自动 `npm pack` 并创建 GitHub Release，资产名固定为 `dsh-commandcode-quota.tgz`
 - **插件市场**：投稿草稿见 [`marketplace/awesome-dsh-plugin.yml`](marketplace/awesome-dsh-plugin.yml)
-- **自建 Discover 索引**：`market/index.json`（`node scripts/build-index.mjs` 生成），用户可在 Plugins → Discover 里添加该 URL
+- **自建 Discover 索引**：`market/index.json`（`node scripts/build-index.mjs` 生成）
 
 ## 已知限制
 
-- 逐条请求明细只存在于 Command Code Studio 的登录会话接口（`/internal/usage*`，需要网页 cookie），API key 拿不到，所以面板只做本期汇总。
-- `/alpha/*` 是 CLI 内部接口，未在公开文档中承诺稳定性；字段缺失时面板会降级显示而不是报错。
-- Command Code 是第三方服务，本插件只是它的数据看板，与 Command Code 官方无隶属关系。
+- 逐条请求明细只存在于 Command Code Studio 的登录会话接口（需要网页 cookie），API key 拿不到，所以面板只做本期汇总。
+- Command Code 的 `/alpha/*` 是 CLI 内部接口，没有公开稳定性承诺；字段缺失时面板会降级显示而不是报错。
+- Command Code 是第三方服务，本插件只是它的数据看板，与官方无隶属关系。
 
 ## License
 
 [MIT](LICENSE)
-
-
