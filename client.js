@@ -538,7 +538,20 @@ window.__ModuleLoader__.load({
       )
     }
 
-    function Meter({ label, data, tr, compactMode }) {
+    // Compact countdown for a window reset: "3:12:45" (h:m:s) or "2:03:12" (d:h:m).
+    function compactCountdown(ms, tr, mode, now) {
+      const total = Math.max(0, Math.floor((ms - (now || Date.now())) / 1000))
+      const days = Math.floor(total / 86400)
+      const hours = Math.floor((total % 86400) / 3600)
+      const minutes = Math.floor((total % 3600) / 60)
+      const seconds = total % 60
+      const pad = (n) => String(n).padStart(2, '0')
+      const body = mode === 'dhms' ? `${days}:${pad(hours)}:${pad(minutes)}` : `${hours}:${pad(minutes)}:${pad(seconds)}`
+      return `${tr('leftPrefix')} ${body}${tr('leftSuffix')}`.replace(/\s+/g, ' ').trim()
+    }
+
+    function Meter({ label, data, tr, compactMode, countdownMode }) {
+      const now = useNow(countdownMode === 'hms' ? 1000 : 30000)
       if (!data) return null
       const percent = data.percent || 0
       return h(
@@ -554,7 +567,7 @@ window.__ModuleLoader__.load({
         h(
           'div',
           { className: 'dcq-meta', style: { fontSize: 10.5 } },
-          h('span', null, data.resetAt ? `${tr('windowReset')} ${clock(data.resetAt)} · ${futureText(data.resetAt, tr)}` : ''),
+          h('span', null, data.resetAt ? `${tr('windowReset')} ${clock(data.resetAt)} · ${compactCountdown(data.resetAt, tr, countdownMode, now)}` : ''),
           h('span', { style: { color: data.exceeded ? 'var(--dsw-alias-state-error-primary)' : 'inherit' } }, `${Math.round(percent)}%`),
         ),
       )
@@ -744,8 +757,8 @@ window.__ModuleLoader__.load({
             ? h(
                 React.Fragment,
                 null,
-                h(Meter, { label: tr('fiveHour'), data: windows.fiveHour, tr, compactMode: small }),
-                h(Meter, { label: tr('weekly'), data: windows.weekly, tr, compactMode: small }),
+                h(Meter, { label: tr('fiveHour'), data: windows.fiveHour, tr, compactMode: small, countdownMode: 'hms' }),
+                h(Meter, { label: tr('weekly'), data: windows.weekly, tr, compactMode: small, countdownMode: 'dhms' }),
               )
             : h('div', { className: 'dcq-note' }, tr('noWindows')),
         ),
