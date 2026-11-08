@@ -52,6 +52,8 @@ Command Code 用量面板，DeepSeek Harness（DSH）Web UI 插件。
   ```
 
   或用 DSH 会话里的 `plugin_manager`：`install_bundle`，`target` 填 `@yumiku/dsh-commandcode-quota`。
+- **npm 尚未发布前**：`install_bundle` 的 `target` 也可以用 GitHub Release 的预构建包
+  `https://github.com/miko-cn/dsh-commandcode-quota/releases/latest/download/dsh-commandcode-quota.tgz`。
 - 本地联调：把仓库 clone 到本机（如 `D:\Workspace\dsh-commandcode-quota`），`install_bundle` 的 `target` 指向该绝对路径。
 - 装好后刷新页面：设置里出现「Command Code」页签，桌面上出现浮窗胶囊。
 
