@@ -38,6 +38,7 @@ const React = {
 }
 
 const created = []
+const portals = []
 const storage = new Map()
 const documentStub = {
   visibilityState: 'visible',
@@ -50,6 +51,17 @@ const documentStub = {
     return node
   },
   head: { appendChild() {} },
+  body: { tag: 'body' },
+}
+
+// The capsule is portaled to document.body so it escapes the host shell's
+// `shell.overlay` stacking context (that layer is z-index:20). Record the
+// portals and flatten their children so the tree stays paintable below.
+const ReactDOM = {
+  createPortal(children, container) {
+    portals.push(container)
+    return { type: Fragment, props: { children } }
+  },
 }
 
 const sampleReport = {
@@ -133,6 +145,7 @@ const ctx = {
 }
 const mod = loaded.factory((name) => {
   if (name === 'react') return React
+  if (name === 'react-dom') return ReactDOM
   throw new Error(`unexpected require(${name})`)
 })
 mod.apply(ctx)
@@ -229,6 +242,17 @@ for (const expected of ['5h', 'W', '5%']) {
 const capsule = findNodes(floatTree, (node) => node.props && node.props.className === 'dcq-float')[0]
 if (!capsule) throw new Error('capsule element not found')
 
+// Regression guard for the stacking-context bug: the shell's `shell.overlay`
+// layer is z-index:20, so the capsule must be portaled out to document.body and
+// carry a z-index above the app's own layers (its highest are ~1250).
+console.log('portal targets:', portals.map((container) => container.tag || 'unknown').join(','))
+if (portals.length === 0) throw new Error('capsule was not portaled to document.body')
+if (portals.some((container) => container !== documentStub.body)) throw new Error('capsule must portal to document.body, not another container')
+const cssText = created[0].textContent || ''
+for (const z of [2147483000, 2147483001]) {
+  if (!cssText.includes(`z-index:${z}`)) throw new Error(`missing top-layer z-index ${z}`)
+}
+
 // Click (pointer down + up without movement) opens the popover.
 const fakeEvent = { button: 0, clientX: 10, clientY: 10, pointerId: 1, currentTarget: { setPointerCapture() {}, releasePointerCapture() {} } }
 capsule.props.onPointerDown(fakeEvent)
@@ -240,6 +264,8 @@ console.log('popover text:', popText)
 for (const expected of ['在 Studio 打开', '套餐额度', '5 小时']) {
   if (!popText.includes(expected)) throw new Error(`popover is missing ${expected}`)
 }
+const backdrop = findNodes(popTree, (node) => node.props && node.props.style && node.props.style.zIndex === 2147482999)[0]
+if (!backdrop) throw new Error('popover backdrop is missing its top-layer z-index')
 
 if (errors.length > 0) throw new Error(`render errors: ${errors.map((error) => error.message).join('; ')}`)
 console.log('fetch calls:', fetchCalls)

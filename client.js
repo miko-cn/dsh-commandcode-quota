@@ -13,7 +13,25 @@ window.__ModuleLoader__.load({
   id: '@yumiku/dsh-commandcode-quota',
   factory(require) {
     const React = require('react')
+    // Host-provided like `react`; older hosts that do not expose it keep the
+    // inline render (still functional, just trapped in the shell layer).
+    let ReactDOM = null
+    try {
+      ReactDOM = require('react-dom')
+    } catch {
+      ReactDOM = null
+    }
     const h = React.createElement
+    // The host's `shell.overlay` layer is itself `position:absolute; z-index:20`
+    // (see dsh-client-ui-layout AppFrame.module.css), so anything rendered inside
+    // it is trapped in that stacking context: a larger inner z-index cannot rise
+    // above dropdowns, dialogs or toasts. The floating capsule is portaled to
+    // `document.body` instead, and these values sit above the app's own layers
+    // (its highest are ~1250) but below the desktop shell's modal card layer
+    // (2147483646) so a full-screen dialog can still cover the pill.
+    const Z_FLOAT = 2147483000
+    const Z_BACKDROP = Z_FLOAT - 1
+    const Z_POP = Z_FLOAT + 1
 
     const NS = 'commandcode-quota'
     const REPORT = '/dsh-commandcode/api/report'
@@ -212,7 +230,7 @@ window.__ModuleLoader__.load({
       .dcq-switch input{accent-color:var(--dsw-alias-brand-primary)}
 
       /* ---- floating capsule: liquid-glass shell, logo + two progress rows ---- */
-      .dcq-float{position:fixed;z-index:88;display:flex;align-items:center;gap:10px;padding:9px 14px 9px 10px;border-radius:16px;cursor:grab;
+      .dcq-float{position:fixed;z-index:${Z_FLOAT};display:flex;align-items:center;gap:10px;padding:9px 14px 9px 10px;border-radius:16px;cursor:grab;
         background:var(--dsw-alias-bg-overlay);
         background:
           linear-gradient(152deg, rgba(255,255,255,.16), rgba(255,255,255,0) 44%, rgba(255,255,255,.05) 100%),
@@ -250,7 +268,7 @@ window.__ModuleLoader__.load({
       @keyframes dcq-pulse{0%,100%{opacity:1}50%{opacity:.25}}
 
       /* ---- popover: deeper glass shell ---- */
-      .dcq-pop{position:fixed;z-index:89;width:320px;max-height:min(70vh,540px);overflow-y:auto;overflow-x:hidden;
+      .dcq-pop{position:fixed;z-index:${Z_POP};width:320px;max-height:min(70vh,540px);overflow-y:auto;overflow-x:hidden;
         display:flex;flex-direction:column;gap:9px;
         background:var(--dsw-alias-bg-overlay);
         background:
@@ -1028,7 +1046,7 @@ window.__ModuleLoader__.load({
         return { left, bottom: Math.max(8, window.innerHeight - top) }
       })()
 
-      return h(
+      const tree = h(
         React.Fragment,
         null,
         h(
@@ -1121,7 +1139,7 @@ window.__ModuleLoader__.load({
           ? h(
               React.Fragment,
               null,
-              h('div', { style: { position: 'fixed', inset: 0, zIndex: 88 }, onClick: closePopover, 'aria-hidden': 'true' }),
+              h('div', { style: { position: 'fixed', inset: 0, zIndex: Z_BACKDROP }, onClick: closePopover, 'aria-hidden': 'true' }),
               h(
                 'div',
                 { className: 'dcq-pop', style: { left: popPos.left, bottom: popPos.bottom }, role: 'dialog', 'aria-label': tr('title') },
@@ -1154,6 +1172,11 @@ window.__ModuleLoader__.load({
             )
           : null,
       )
+      // `document.body` exists in the real client; the paint stub may not have
+      // one, in which case the tree renders inline (and the smoke test's portal
+      // assertion is skipped) instead of crashing.
+      const host = typeof document !== 'undefined' && document.body ? document.body : null
+      return host && ReactDOM ? ReactDOM.createPortal(tree, host) : tree
     }
 
     // Visible, copyable boot diagnostics: a failing step must not take the whole
