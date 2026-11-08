@@ -1,0 +1,11 @@
+# Bundle patch: inserts the plugin row that provides the sidebar "Command Code" panel.
+# The user's own patch layer may override this config later.
+- insert:
+    - id: commandcode-quota
+      name: '@local/commandcode-quota'
+      config:
+        apiBase: https://api.commandcode.ai
+        apiKeyEnv: COMMAND_CODE_API_KEY
+        planOverride: ''
+        cacheMs: 45000
+        timeoutMs: 12000

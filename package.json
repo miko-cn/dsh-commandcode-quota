@@ -1,0 +1,49 @@
+{
+  "name": "@local/commandcode-quota",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Command Code usage, credit and plan-tier panel in the DSH sidebar footer.",
+  "license": "MIT",
+  "icon": "./icon.svg",
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "dsh-plugin",
+    "commandcode",
+    "usage",
+    "quota"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/miko-cn/dsh-commandcode-quota.git"
+  },
+  "homepage": "https://github.com/miko-cn/dsh-commandcode-quota#readme",
+  "bugs": {
+    "url": "https://github.com/miko-cn/dsh-commandcode-quota/issues"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true
+    }
+  }
+}
