@@ -38,6 +38,12 @@ window.__ModuleLoader__.load({
       fiveHour: '5 小时',
       weekly: '每周',
       windowReset: '重置',
+      leftPrefix: '还剩',
+      leftSuffix: '',
+      dayUnit: '天',
+      hourUnit: '小时',
+      minuteUnit: '分',
+      periodEnded: '已到期',
       noWindows: '按量计费套餐，没有 5 小时 / 每周窗口限制',
       period: '本期请求',
       requests: '请求',
@@ -100,6 +106,12 @@ window.__ModuleLoader__.load({
       fiveHour: '5-hour',
       weekly: 'Weekly',
       windowReset: 'resets',
+      leftPrefix: '',
+      leftSuffix: ' left',
+      dayUnit: 'd',
+      hourUnit: 'h',
+      minuteUnit: 'm',
+      periodEnded: 'ended',
       noWindows: 'Pay-as-you-go plan: no 5-hour or weekly windows',
       period: 'Requests this period',
       requests: 'requests',
@@ -460,6 +472,24 @@ window.__ModuleLoader__.load({
       if (diff < 86400000) return `${Math.floor(diff / 3600000)} ${tr('hoursAgo')}`
       return `${Math.floor(diff / 86400000)} ${tr('daysAgo')}`
     }
+    // "还剩 21 天 4 小时" / "21d 4h left", for a deadline in the future.
+    function futureText(ts, tr) {
+      const diff = ts - Date.now()
+      if (!Number.isFinite(diff)) return ''
+      if (diff <= 0) return tr('periodEnded')
+      const minutes = Math.max(1, Math.floor(diff / 60000))
+      let body
+      if (minutes < 60) {
+        body = `${minutes}${tr('minuteUnit')}`
+      } else {
+        const hours = Math.floor(minutes / 60)
+        body =
+          hours < 24
+            ? `${hours}${tr('hourUnit')} ${minutes % 60}${tr('minuteUnit')}`
+            : `${Math.floor(hours / 24)}${tr('dayUnit')} ${hours % 24}${tr('hourUnit')}`
+      }
+      return `${tr('leftPrefix')} ${body}${tr('leftSuffix')}`.replace(/\s+/g, ' ').trim()
+    }
     function toneVar(percent) {
       if (percent === null || percent === undefined) return 'var(--dsw-alias-brand-primary)'
       if (percent >= 85) return 'var(--dsw-alias-state-error-primary)'
@@ -524,7 +554,7 @@ window.__ModuleLoader__.load({
         h(
           'div',
           { className: 'dcq-meta', style: { fontSize: 10.5 } },
-          h('span', null, data.resetAt ? `${tr('windowReset')} ${clock(data.resetAt)}` : ''),
+          h('span', null, data.resetAt ? `${tr('windowReset')} ${clock(data.resetAt)} · ${futureText(data.resetAt, tr)}` : ''),
           h('span', { style: { color: data.exceeded ? 'var(--dsw-alias-state-error-primary)' : 'inherit' } }, `${Math.round(percent)}%`),
         ),
       )
@@ -691,7 +721,7 @@ window.__ModuleLoader__.load({
             ? h(
                 'div',
                 { className: 'dcq-meta', style: { marginTop: 4 } },
-                h('span', null, `${tr('renew')} ${shortDate(summary.periodEnd) || '—'}`),
+                h('span', null, `${tr('renew')} ${shortDate(summary.periodEnd) || '—'}${summary.periodEnd ? ` · ${futureText(Date.parse(summary.periodEnd), tr)}` : ''}`),
                 h('span', null, summary.periodStart ? `${shortDate(summary.periodStart)} →` : ''),
               )
             : null,

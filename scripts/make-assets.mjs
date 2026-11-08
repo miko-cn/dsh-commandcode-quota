@@ -211,7 +211,7 @@ function popover() {
     parts.push(bar({ x: c, y: t + 150, w, h: 18, pct: 3 }))
     parts.push(text({ x: c, y: t + 208, size: 28, fill: P.muted }, '已用 2.26 / 70'))
     parts.push(text({ x: c + w, y: t + 208, size: 28, fill: P.muted, anchor: 'end' }, '3.2%'))
-    parts.push(text({ x: c, y: t + 246, size: 28, fill: P.dim }, '续费 12/3'))
+    parts.push(text({ x: c, y: t + 246, size: 28, fill: P.dim }, '续费 12/3 · 还剩 21 天 6 小时'))
     parts.push(text({ x: c + w, y: t + 246, size: 28, fill: P.dim, anchor: 'end' }, '11/3 →'))
   }
 
@@ -225,12 +225,12 @@ function popover() {
     parts.push(text({ x: c, y: t + 104, size: 28, weight: 600 }, '5 小时'))
     parts.push(text({ x: c + w, y: t + 104, size: 26, fill: P.muted, anchor: 'end' }, '1.17 / 14'))
     parts.push(bar({ x: c, y: t + 118, w, h: 16, pct: 8 }))
-    parts.push(text({ x: c, y: t + 164, size: 24, fill: P.dim }, '重置 15:55'))
+    parts.push(text({ x: c, y: t + 164, size: 24, fill: P.dim }, '重置 15:55 · 还剩 3 小时 12 分'))
     parts.push(text({ x: c + w, y: t + 164, size: 24, fill: P.muted, anchor: 'end' }, '8%'))
     parts.push(text({ x: c, y: t + 214, size: 28, weight: 600 }, '每周'))
     parts.push(text({ x: c + w, y: t + 214, size: 26, fill: P.muted, anchor: 'end' }, '2.26 / 35'))
     parts.push(bar({ x: c, y: t + 228, w, h: 16, pct: 7 }))
-    parts.push(text({ x: c, y: t + 274, size: 24, fill: P.dim }, '重置 11/10 22:57'))
+    parts.push(text({ x: c, y: t + 274, size: 24, fill: P.dim }, '重置 11/10 22:57 · 还剩 2 天 3 小时'))
     parts.push(text({ x: c + w, y: t + 274, size: 24, fill: P.muted, anchor: 'end' }, '7%'))
   }
 
@@ -324,7 +324,7 @@ function settings() {
     parts.push(bar({ x: c, y: t + 150, w: iw, h: 18, pct: 3 }))
     parts.push(text({ x: c, y: t + 208, size: 26, fill: P.muted }, '已用 2.26 / 70'))
     parts.push(text({ x: c + iw, y: t + 208, size: 26, fill: P.muted, anchor: 'end' }, '3.2%'))
-    parts.push(text({ x: c, y: t + 244, size: 26, fill: P.dim }, '续费 12/3'))
+    parts.push(text({ x: c, y: t + 244, size: 26, fill: P.dim }, '续费 12/3 · 还剩 21 天 6 小时'))
     parts.push(text({ x: c + iw, y: t + 244, size: 26, fill: P.dim, anchor: 'end' }, '11/3 →'))
   }
 
@@ -336,12 +336,12 @@ function settings() {
     parts.push(text({ x: c, y: t + 104, size: 28, weight: 600 }, '5 小时'))
     parts.push(text({ x: c + iw, y: t + 104, size: 26, fill: P.muted, anchor: 'end' }, '1.17 / 14'))
     parts.push(bar({ x: c, y: t + 118, w: iw, h: 16, pct: 8 }))
-    parts.push(text({ x: c, y: t + 164, size: 24, fill: P.dim }, '重置 15:55'))
+    parts.push(text({ x: c, y: t + 164, size: 24, fill: P.dim }, '重置 15:55 · 还剩 3 小时 12 分'))
     parts.push(text({ x: c + iw, y: t + 164, size: 24, fill: P.muted, anchor: 'end' }, '8%'))
     parts.push(text({ x: c, y: t + 222, size: 28, weight: 600 }, '每周'))
     parts.push(text({ x: c + iw, y: t + 222, size: 26, fill: P.muted, anchor: 'end' }, '2.26 / 35'))
     parts.push(bar({ x: c, y: t + 236, w: iw, h: 16, pct: 7 }))
-    parts.push(text({ x: c, y: t + 282, size: 24, fill: P.dim }, '重置 11/10 22:57'))
+    parts.push(text({ x: c, y: t + 282, size: 24, fill: P.dim }, '重置 11/10 22:57 · 还剩 2 天 3 小时'))
     parts.push(text({ x: c + iw, y: t + 282, size: 24, fill: P.muted, anchor: 'end' }, '7%'))
   }
 
