@@ -21,7 +21,7 @@ const PLUGIN = {
   category: 'usage',
   keywords: ['commandcode', 'usage', 'quota', 'credits', 'balance', 'settings', 'floating'],
   author: 'miko-cn',
-  icon: 'icon.png',
+  icon: 'icon.webp',
 }
 
 const CATEGORY = { title: { en: 'Usage & Billing', zh: '用量与计费' } }
@@ -83,6 +83,6 @@ const index = {
 
 mkdirSync(join(root, 'market'), { recursive: true })
 writeFileSync(join(root, 'market', 'index.json'), `${JSON.stringify(index, null, 2)}\n`, 'utf8')
-copyFileSync(join(root, 'icon.png'), join(root, 'market', 'icon.png'))
+copyFileSync(join(root, PLUGIN.icon), join(root, 'market', PLUGIN.icon))
 
 console.log(`market/index.json: ${pkg.name}@${pkg.version}, ${index.plugins[0].versions[0].publishTimestamp}`)

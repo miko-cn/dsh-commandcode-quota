@@ -31,7 +31,7 @@
         "en": "Plan credits, 5-hour and weekly windows, period request stats, plan tiers and an in-app API-key editor for Command Code — a Settings tab plus a draggable floating capsule. Requires your own Command Code account or API key.",
         "zh": "在 DSH 里查看 Command Code 的套餐额度、5 小时 / 每周滚动窗口、本期请求统计与套餐档位，含设置页签与可拖动的浮窗胶囊，并内置 API key 管理。需要自己的 Command Code 账号 / API key。"
       },
-      "icon": "icon.png",
+      "icon": "icon.webp",
       "author": "miko-cn",
       "homepage": "https://github.com/miko-cn/dsh-commandcode-quota#readme",
       "repository": {

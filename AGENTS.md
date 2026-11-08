@@ -21,7 +21,7 @@
 | `client.js` | Client：`settings.section`、`settings.section.icon`、`shell.overlay`；浮窗与浮层 | 改界面时 |
 | `cordis.patch.yml` | bundle patch：插入插件行与默认 config | 改默认配置时 |
 | `locale/zh.json`、`locale/en.json` | 插件列表里的标题/描述（meta） | 改文案时 |
-| `market/index.json` + `market/icon.png` | 自建 format-1 Discover 索引 | **每次发版后**用脚本重建 |
+| `market/index.json` + `market/icon.webp` | 自建 format-1 Discover 索引 | **每次发版后**用脚本重建 |
 | `assets/` | README 的 banner 与界面预览 | 界面文案/布局变化后用脚本重渲染 |
 | `test/` | 客户端桩测试 + Host 真实接口测试 | 改行为时同步补 |
 | `scripts/build-index.mjs` | 从 `package.json` + npm 发布时间生成索引 | 不用手改 `market/index.json` |
