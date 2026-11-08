@@ -85,7 +85,7 @@ https://raw.githubusercontent.com/miko-cn/dsh-commandcode-quota/main/market/inde
 
 ### Plan credits
 
-Command Code's monthly credits are one pool. The panel shows remaining / total, the used percentage, and **how long until renewal** (e.g. "renews 12/3 · 25d 1h left"). Credits reset monthly and do not roll over; purchased and free credits are listed separately.
+Command Code's monthly credits are one pool. The panel shows remaining / total in credits, the used percentage, the billing-cycle range, and **how long until renewal** (e.g. "Cycle 11/3 – 12/3 · 25d 1h left"). Credits reset monthly and do not roll over; purchased and free credits are listed separately.
 
 ### 5-hour / weekly windows
 
@@ -134,7 +134,7 @@ Open **Settings → Command Code** and turn "Show the floating widget" back on.
 A 1.0.2 issue (an undeclared client service); fixed in 1.0.4 — upgrade to the latest version.
 
 **Does it hammer the API?**
-It refreshes when you open the panel, every minute while it is open, and every 5 minutes in the background capsule; nothing runs while the page is hidden. Each refresh calls 4 Command Code endpoints.
+It refreshes when you open the panel, every minute while it is open, and every 5 minutes by default in the background capsule (1–10 minutes, configurable in Settings); nothing runs while the page is hidden. Each refresh calls 4 Command Code endpoints.
 
 **Is there a Chinese UI?**
 Yes. UI text follows the DSH language setting (Chinese and English are bundled), and this README has a [Chinese version](README.md).
