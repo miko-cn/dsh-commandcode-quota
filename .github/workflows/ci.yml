@@ -38,6 +38,8 @@ jobs:
           "
       - name: Client smoke test
         run: node test/test-client.mjs
+      - name: Locale parity
+        run: node scripts/check-locales.mjs
       - name: Install dev dependencies
         run: npm install --no-audit --no-fund --no-package-lock
       - name: Validate the Discover index

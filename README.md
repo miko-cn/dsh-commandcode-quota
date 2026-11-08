@@ -203,6 +203,7 @@ node --check index.js
 node --check client.js
 node test/test-client.mjs          # 桩浏览器环境：槽位注册、设置页、浮窗、浮层
 node test/test-host.mjs <api-key>  # 真实接口：报表 + key 状态
+node scripts/check-locales.mjs     # 中英文案 key 对齐
 ```
 
 README 里的图片由 `scripts/make-assets.mjs` 渲染，需要 sharp：

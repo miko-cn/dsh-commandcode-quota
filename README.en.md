@@ -203,6 +203,7 @@ node --check index.js
 node --check client.js
 node test/test-client.mjs          # stubbed browser: slot registration, settings, capsule, popover
 node test/test-host.mjs <api-key>  # real API: report + key status
+node scripts/check-locales.mjs     # zh/en string parity
 ```
 
 README artwork is rendered by `scripts/make-assets.mjs` (needs sharp):
