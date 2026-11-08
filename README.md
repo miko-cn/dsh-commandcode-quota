@@ -9,6 +9,7 @@
   <a href="https://github.com/miko-cn/dsh-commandcode-quota/actions/workflows/ci.yml"><img alt="ci" src="https://github.com/miko-cn/dsh-commandcode-quota/actions/workflows/ci.yml/badge.svg" /></a>
   <img alt="dsh" src="https://img.shields.io/badge/dsh-%E2%89%A50.2.0-0ea97a" />
   <a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-MIT-blue" /></a>
+  <a href="https://github.com/deepseek-ai/deepseek-harness"><img alt="powered by dsh" src="https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square&logo=deepseek&logoColor=white" /></a>
 </p>
 
 <h3 align="center">在 DeepSeek Harness 里，直接看 Command Code 的额度、窗口和请求量。</h3>
@@ -171,6 +172,4 @@ $env:SHARP_PATH='<path-to-node_modules>/sharp'; node scripts/make-assets.mjs
 
 [MIT](LICENSE)
 
----
 
-[![](https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square&logo=deepseek&logoColor=white)](https://github.com/deepseek-ai/deepseek-harness)
