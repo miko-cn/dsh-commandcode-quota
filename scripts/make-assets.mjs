@@ -42,6 +42,14 @@ const esc = (value) =>
 const text = ({ x, y, size = 16, weight = 400, fill = P.text, anchor = 'start', family = FONT, opacity = 1, spacing = 0 }, value) =>
   `<text x="${x}" y="${y}" font-family="${family}" font-size="${size}" font-weight="${weight}" fill="${fill}" text-anchor="${anchor}" opacity="${opacity}" letter-spacing="${spacing}">${esc(value)}</text>`
 
+// Countdown line with bold numeric runs: "重置 15:55 · 还剩 **3**h **12**m **45**s".
+const countdownText = ({ x, y, size, fill = P.dim, prefix, parts, suffix = '' }) => {
+  const body = parts
+    .map(([value, unit]) => `<tspan font-weight="700">${esc(value)}</tspan>${esc(unit)}`)
+    .join(' ')
+  return `<text x="${x}" y="${y}" font-family="${FONT}" font-size="${size}" fill="${fill}">${esc(prefix)}${body}${esc(suffix)}</text>`
+}
+
 const rect = ({ x, y, w, h, r = 0, fill = 'none', stroke = 'none', sw = 1, opacity = 1 }) =>
   `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" opacity="${opacity}"/>`
 
@@ -225,12 +233,12 @@ function popover() {
     parts.push(text({ x: c, y: t + 104, size: 28, weight: 600 }, '5 小时'))
     parts.push(text({ x: c + w, y: t + 104, size: 26, fill: P.muted, anchor: 'end' }, '1.17 / 14'))
     parts.push(bar({ x: c, y: t + 118, w, h: 16, pct: 8 }))
-    parts.push(text({ x: c, y: t + 164, size: 24, fill: P.dim }, '重置 15:55 · 还剩 3h 12m 45s'))
+    parts.push(countdownText({ x: c, y: t + 164, size: 24, prefix: '重置 15:55 · 还剩 ', parts: [[3, 'h'], [12, 'm'], [45, 's']] }))
     parts.push(text({ x: c + w, y: t + 164, size: 24, fill: P.muted, anchor: 'end' }, '8%'))
     parts.push(text({ x: c, y: t + 214, size: 28, weight: 600 }, '每周'))
     parts.push(text({ x: c + w, y: t + 214, size: 26, fill: P.muted, anchor: 'end' }, '2.26 / 35'))
     parts.push(bar({ x: c, y: t + 228, w, h: 16, pct: 7 }))
-    parts.push(text({ x: c, y: t + 274, size: 24, fill: P.dim }, '重置 11/10 22:57 · 还剩 2d 3h 12m'))
+    parts.push(countdownText({ x: c, y: t + 274, size: 24, prefix: '重置 11/10 22:57 · 还剩 ', parts: [[2, 'd'], [3, 'h'], [12, 'm']] }))
     parts.push(text({ x: c + w, y: t + 274, size: 24, fill: P.muted, anchor: 'end' }, '7%'))
   }
 
@@ -336,12 +344,12 @@ function settings() {
     parts.push(text({ x: c, y: t + 104, size: 28, weight: 600 }, '5 小时'))
     parts.push(text({ x: c + iw, y: t + 104, size: 26, fill: P.muted, anchor: 'end' }, '1.17 / 14'))
     parts.push(bar({ x: c, y: t + 118, w: iw, h: 16, pct: 8 }))
-    parts.push(text({ x: c, y: t + 164, size: 24, fill: P.dim }, '重置 15:55 · 还剩 3h 12m 45s'))
+    parts.push(countdownText({ x: c, y: t + 164, size: 24, prefix: '重置 15:55 · 还剩 ', parts: [[3, 'h'], [12, 'm'], [45, 's']] }))
     parts.push(text({ x: c + iw, y: t + 164, size: 24, fill: P.muted, anchor: 'end' }, '8%'))
     parts.push(text({ x: c, y: t + 222, size: 28, weight: 600 }, '每周'))
     parts.push(text({ x: c + iw, y: t + 222, size: 26, fill: P.muted, anchor: 'end' }, '2.26 / 35'))
     parts.push(bar({ x: c, y: t + 236, w: iw, h: 16, pct: 7 }))
-    parts.push(text({ x: c, y: t + 282, size: 24, fill: P.dim }, '重置 11/10 22:57 · 还剩 2d 3h 12m'))
+    parts.push(countdownText({ x: c, y: t + 282, size: 24, prefix: '重置 11/10 22:57 · 还剩 ', parts: [[2, 'd'], [3, 'h'], [12, 'm']] }))
     parts.push(text({ x: c + iw, y: t + 282, size: 24, fill: P.muted, anchor: 'end' }, '7%'))
   }
 

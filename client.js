@@ -538,15 +538,32 @@ window.__ModuleLoader__.load({
       )
     }
 
-    // Compact countdown for a window reset: "3h 12m 45s" or "2d 3h 12m".
-    function compactCountdown(ms, tr, mode, now) {
+    // Compact countdown for a window reset: "3h 12m 45s" or "2d 3h 12m",
+    // dropping a leading zero unit ("59m 59s", "23h 59m").
+    function countdownParts(ms, mode, now) {
       const total = Math.max(0, Math.floor((ms - (now || Date.now())) / 1000))
-      const days = Math.floor(total / 86400)
-      const hours = Math.floor((total % 86400) / 3600)
-      const minutes = Math.floor((total % 3600) / 60)
-      const seconds = total % 60
-      const body = mode === 'dhms' ? `${days}d ${hours}h ${minutes}m` : `${hours}h ${minutes}m ${seconds}s`
-      return `${tr('leftPrefix')} ${body}${tr('leftSuffix')}`.replace(/\s+/g, ' ').trim()
+      const raw =
+        mode === 'dhms'
+          ? [Math.floor(total / 86400), 'd', Math.floor((total % 86400) / 3600), 'h', Math.floor((total % 3600) / 60), 'm']
+          : [Math.floor((total % 86400) / 3600), 'h', Math.floor((total % 3600) / 60), 'm', total % 60, 's']
+      const pairs = []
+      for (let index = 0; index < raw.length; index += 2) pairs.push({ value: raw[index], unit: raw[index + 1] })
+      while (pairs.length > 1 && pairs[0].value === 0) pairs.shift()
+      return pairs
+    }
+
+    function Countdown({ ms, tr, mode, now }) {
+      const pairs = countdownParts(ms, mode, now)
+      const nodes = []
+      if (tr('leftPrefix')) nodes.push(`${tr('leftPrefix')} `)
+      pairs.forEach((pair, index) => {
+        nodes.push(
+          h('span', { key: `v${index}`, style: { fontWeight: 700, fontVariantNumeric: 'tabular-nums' } }, String(pair.value)),
+        )
+        nodes.push(`${pair.unit}${index === pairs.length - 1 ? '' : ' '}`)
+      })
+      if (tr('leftSuffix')) nodes.push(tr('leftSuffix'))
+      return h(React.Fragment, null, nodes)
     }
 
     function Meter({ label, data, tr, compactMode, countdownMode }) {
@@ -566,7 +583,12 @@ window.__ModuleLoader__.load({
         h(
           'div',
           { className: 'dcq-meta', style: { fontSize: 10.5 } },
-          h('span', null, data.resetAt ? `${tr('windowReset')} ${clock(data.resetAt)} · ${compactCountdown(data.resetAt, tr, countdownMode, now)}` : ''),
+          h(
+            'span',
+            null,
+            data.resetAt ? `${tr('windowReset')} ${clock(data.resetAt)} · ` : '',
+            data.resetAt ? h(Countdown, { ms: data.resetAt, tr, mode: countdownMode, now }) : '',
+          ),
           h('span', { style: { color: data.exceeded ? 'var(--dsw-alias-state-error-primary)' : 'inherit' } }, `${Math.round(percent)}%`),
         ),
       )
