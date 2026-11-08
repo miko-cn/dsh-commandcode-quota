@@ -259,6 +259,21 @@ for (const expected of ['5h', 'W', '5%']) {
 const capsule = findNodes(floatTree, (node) => node.props && node.props.className === 'dcq-float')[0]
 if (!capsule) throw new Error('capsule element not found')
 
+// Threshold tint: the capsule carries the worst gauge's severity — amber from
+// 70%, red from 90% — and the stylesheet carries both tints.
+const severityCss = created[0].textContent || ''
+for (const selector of ['data-severity="warn"', 'data-severity="danger"']) {
+  if (!severityCss.includes(selector)) throw new Error(`missing severity style ${selector}`)
+}
+if (capsule.props['data-severity'] !== 'ok') throw new Error(`capsule starts at severity ${capsule.props['data-severity']}`)
+sampleReport.credits.percent = 75
+const warnCapsule = findNodes(paint(floating), (node) => node.props && node.props.className === 'dcq-float')[0]
+if (warnCapsule.props['data-severity'] !== 'warn') throw new Error(`capsule did not turn amber at 75% (${warnCapsule.props['data-severity']})`)
+sampleReport.credits.percent = 95
+const dangerCapsule = findNodes(paint(floating), (node) => node.props && node.props.className === 'dcq-float')[0]
+if (dangerCapsule.props['data-severity'] !== 'danger') throw new Error(`capsule did not turn red at 95% (${dangerCapsule.props['data-severity']})`)
+sampleReport.credits.percent = 2.6
+
 // Regression guard for the stacking-context bug: the shell's `shell.overlay`
 // layer is z-index:20, so the capsule must be portaled out to document.body and
 // carry a z-index above the app's own layers (its highest are ~1250).

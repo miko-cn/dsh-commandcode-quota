@@ -316,6 +316,17 @@ window.__ModuleLoader__.load({
         background:radial-gradient(120% 80% at 18% 0%, rgba(255,255,255,.22), rgba(255,255,255,0) 58%)}
       .dcq-float:active{cursor:grabbing}
       .dcq-float[data-dragging="1"]{box-shadow:0 16px 40px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.32);opacity:.97}
+      /* Threshold tint: amber from 70%, red from 90%, on the same glass shell. */
+      .dcq-float[data-severity="warn"]{border-color:color-mix(in srgb,var(--dsw-alias-state-warn-primary) 55%,transparent);
+        background:linear-gradient(152deg, rgba(255,255,255,.16), rgba(255,255,255,0) 44%, rgba(255,255,255,.05) 100%),
+          color-mix(in srgb, var(--dsw-alias-state-warn-primary) 26%, var(--dsw-alias-bg-overlay))}
+      .dcq-float[data-severity="danger"]{border-color:color-mix(in srgb,var(--dsw-alias-state-error-primary) 60%,transparent);
+        background:linear-gradient(152deg, rgba(255,255,255,.16), rgba(255,255,255,0) 44%, rgba(255,255,255,.05) 100%),
+          color-mix(in srgb, var(--dsw-alias-state-error-primary) 30%, var(--dsw-alias-bg-overlay))}
+      .dcq-float[data-severity="warn"]::after{background:radial-gradient(120% 80% at 18% 0%, rgba(255,196,0,.18), rgba(255,255,255,0) 58%)}
+      .dcq-float[data-severity="danger"]::after{background:radial-gradient(120% 80% at 18% 0%, rgba(242,85,90,.22), rgba(255,255,255,0) 58%)}
+      .dcq-float[data-severity="warn"] .dcq-float-dot{background:var(--dsw-alias-state-warn-primary);box-shadow:0 0 8px color-mix(in srgb,var(--dsw-alias-state-warn-primary) 60%,transparent)}
+      .dcq-float[data-severity="danger"] .dcq-float-dot{background:var(--dsw-alias-state-error-primary);box-shadow:0 0 8px color-mix(in srgb,var(--dsw-alias-state-error-primary) 65%,transparent)}
       .dcq-float-mark{width:26px;height:26px;display:grid;place-items:center;flex:none}
       .dcq-float-mark img{border-radius:7px;box-shadow:0 2px 6px rgba(0,0,0,.35)}
       .dcq-float-bars{display:flex;flex-direction:column;gap:6px;min-width:132px}
@@ -575,21 +586,39 @@ window.__ModuleLoader__.load({
       const minutes = Math.max(1, Math.floor(diff / 60000))
       let body
       if (minutes < 60) {
-        body = `${minutes}${tr('minuteUnit')}`
+        body = `${minutes}m`
       } else {
         const hours = Math.floor(minutes / 60)
-        body =
-          hours < 24
-            ? `${hours}${tr('hourUnit')} ${minutes % 60}${tr('minuteUnit')}`
-            : `${Math.floor(hours / 24)}${tr('dayUnit')} ${hours % 24}${tr('hourUnit')}`
+        body = hours < 24 ? `${hours}h ${minutes % 60}m` : `${Math.floor(hours / 24)}d ${hours % 24}h`
       }
       return `${tr('leftPrefix')} ${body}${tr('leftSuffix')}`.replace(/\s+/g, ' ').trim()
     }
+    // One threshold pair for every gauge: amber at 70%, red at 90%. The bars,
+    // the credit number and the capsule tint all read the same two numbers.
+    const WARN_PERCENT = 70
+    const DANGER_PERCENT = 90
+
     function toneVar(percent) {
       if (percent === null || percent === undefined) return 'var(--dsw-alias-brand-primary)'
-      if (percent >= 85) return 'var(--dsw-alias-state-error-primary)'
-      if (percent >= 60) return 'var(--dsw-alias-state-warn-primary)'
+      if (percent >= DANGER_PERCENT) return 'var(--dsw-alias-state-error-primary)'
+      if (percent >= WARN_PERCENT) return 'var(--dsw-alias-state-warn-primary)'
       return 'var(--dsw-alias-brand-primary)'
+    }
+
+    /** Worst of credits / 5-hour / weekly, so the capsule shows the hottest gauge. */
+    function severityFor(report) {
+      if (!report) return null
+      const windows = report.windows || {}
+      const values = [
+        report.credits && report.credits.percent,
+        windows.fiveHour && windows.fiveHour.percent,
+        windows.weekly && windows.weekly.percent,
+      ].filter((value) => typeof value === 'number' && Number.isFinite(value))
+      if (!values.length) return null
+      const worst = Math.max(...values)
+      if (worst >= DANGER_PERCENT) return 'danger'
+      if (worst >= WARN_PERCENT) return 'warn'
+      return 'ok'
     }
 
     const PLAN_OPTIONS = [
@@ -1183,6 +1212,7 @@ window.__ModuleLoader__.load({
       if (!position) return null
 
       const report = store.report
+      const severity = severityFor(report)
       const windows = report && report.windows
       const five = windows && windows.fiveHour
       const week = windows && windows.weekly
@@ -1215,6 +1245,7 @@ window.__ModuleLoader__.load({
             'aria-label': tr('button'),
             title: tr('drag'),
             'data-dragging': dragging ? '1' : '0',
+            'data-severity': severity,
             onPointerDown,
             onPointerMove,
             onPointerUp,
