@@ -33,12 +33,10 @@
 ## 界面
 
 <p align="center">
-  <img src="assets/preview-popover.png" alt="浮层与浮窗胶囊" width="46%" />
-  &nbsp;&nbsp;
-  <img src="assets/preview-settings.png" alt="设置页" width="52%" />
+  <img src="assets/screenshot-overview.png" alt="Command Code 浮层与浮窗胶囊（真实界面）" width="640" />
 </p>
 
-<p align="center"><sub>左：浮层与浮窗胶囊（双行进度条） · 右：设置 → Command Code 页面</sub></p>
+<p align="center"><sub>真实界面：液态毛玻璃浮层 + 双行进度条浮窗胶囊</sub></p>
 
 ## 快速开始
 
