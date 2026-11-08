@@ -115,7 +115,14 @@ if (!loaded || loaded.id !== '@yumiku/dsh-commandcode-quota') throw new Error('m
 
 const registrations = []
 const ctx = {
-  get: () => undefined,
+  locale: {
+    register() {
+      return () => {}
+    },
+    bind() {
+      return (key) => key
+    },
+  },
   slots: {
     inject(_key, callback) { callback() },
     register(options, component) { registrations.push({ options, component }) },

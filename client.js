@@ -1048,41 +1048,93 @@ window.__ModuleLoader__.load({
       )
     }
 
+    // Visible, copyable boot diagnostics: a failing step must not take the whole
+    // client entry down (the boot audit would show only "failed" with no cause).
+    function bootFailure(step, error) {
+      const detail = (error && (error.stack || error.message)) || String(error)
+      try {
+        console.error('[commandcode-quota] apply failed at ' + step + '\n' + detail)
+      } catch {
+        /* no console */
+      }
+      try {
+        if (typeof document === 'undefined' || !document.body) return
+        let box = document.getElementById('dcq-boot-error')
+        if (!box) {
+          box = document.createElement('pre')
+          box.id = 'dcq-boot-error'
+          box.style.cssText =
+            'position:fixed;z-index:2147483647;left:10px;bottom:10px;max-width:72vw;max-height:42vh;overflow:auto;margin:0;padding:10px 12px;' +
+            'border:1px solid #f2555a;border-radius:10px;background:#2b0f10;color:#ffd9dc;font:11px/1.5 ui-monospace,Consolas,monospace;white-space:pre-wrap'
+          document.body.appendChild(box)
+        }
+        box.textContent += '[commandcode-quota] ' + step + ': ' + detail + '\n'
+      } catch {
+        /* no DOM */
+      }
+    }
+
     return {
-      inject: ['slots'],
+      // Client services must be declared: Cordis throws on an undeclared
+      // `ctx.<service>` read ("cannot get property ... without inject").
+      inject: ['slots', 'locale'],
       apply(ctx) {
-        const locale = (typeof ctx.get === 'function' ? ctx.get('locale') : undefined) || ctx.locale
-        const hasLocale = Boolean(locale && typeof locale.register === 'function')
-        let translate = fallbackT
-        if (hasLocale) {
-          ctx.effect(() => locale.register(NS, { zh, en }), 'commandcode-quota: dictionaries')
-          if (typeof locale.bind === 'function') translate = locale.bind(NS)
+        const step = (label, run) => {
+          try {
+            run()
+            return true
+          } catch (error) {
+            bootFailure(label, error)
+            return false
+          }
         }
 
-        ctx.effect(() => {
-          if (document.getElementById(STYLE_ID)) return undefined
-          const style = document.createElement('style')
-          style.id = STYLE_ID
-          style.textContent = CSS
-          document.head.appendChild(style)
-          return () => style.remove()
-        }, 'commandcode-quota: styles')
+        let translate = fallbackT
+        let localeBound = false
+        step('locale', () => {
+          if (!ctx.locale || typeof ctx.locale.register !== 'function') return
+          ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'commandcode-quota: dictionaries')
+          if (typeof ctx.locale.bind === 'function') {
+            translate = ctx.locale.bind(NS)
+            localeBound = true
+          }
+        })
 
-        const base = { order: 30, ...(hasLocale ? { locale: NS } : {}), inject: () => ({ t: translate }) }
+        step('styles', () => {
+          ctx.effect(() => {
+            if (document.getElementById(STYLE_ID)) return undefined
+            const style = document.createElement('style')
+            style.id = STYLE_ID
+            style.textContent = CSS
+            document.head.appendChild(style)
+            return () => style.remove()
+          }, 'commandcode-quota: styles')
+        })
 
-        ctx.slots.inject('settings.section', () =>
-          ctx.slots.register({ name: 'settings.section', id: 'commandcode-quota', label: () => translate('button'), ...base }, SettingsPage),
-        )
-        if (ctx.slots.inject) {
+        const base = { order: 30, ...(localeBound ? { locale: NS } : {}), inject: () => ({ t: translate }) }
+
+        step('settings.section', () => {
+          ctx.slots.inject('settings.section', () =>
+            ctx.slots.register({ name: 'settings.section', id: 'commandcode-quota', label: () => translate('button'), ...base }, SettingsPage),
+          )
+        })
+
+        step('settings.section.icon', () => {
           ctx.slots.inject('settings.section.icon', () =>
             ctx.slots.register({ name: 'settings.section.icon', id: 'commandcode-quota' }, (props) =>
               h(Icon, { size: (props && props.size) || 16 }),
             ),
           )
-        }
-        ctx.slots.inject('shell.overlay', () =>
-          ctx.slots.register({ name: 'shell.overlay', id: 'commandcode-quota-float', order: 30, ...(hasLocale ? { locale: NS } : {}), inject: () => ({ t: translate }) }, FloatingWidget),
-        )
+        })
+
+        step('shell.overlay', () => {
+          ctx.slots.inject('shell.overlay', () =>
+            ctx.slots.register(
+              { name: 'shell.overlay', id: 'commandcode-quota-float', order: 30, ...(localeBound ? { locale: NS } : {}), inject: () => ({ t: translate }) },
+              FloatingWidget,
+            ),
+          )
+        })
       },
     }
   },

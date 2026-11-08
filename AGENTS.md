@@ -22,6 +22,9 @@
 5. **主题与国际化**：颜色只用 `--dsw-alias-*` token；可见文案走 locale 服务（`zh` / `en` 两套），不要硬编码在组件里。玻璃/高光这类装饰可以用半透明白，但基础容器必须用 token。
 6. **不碰官方**：不改、不包、不冒用 `@deepseek-ai/*`；安装期不执行任何脚本。
 7. **隐私**：不要提交真实账号截图、邮箱、本机绝对路径或任何 key。测试与素材一律用 demo 数据（`@demo` / `Example User`）。
+8. **客户端 service 必须写进 `inject`**：用到 `slots`、`locale`、`connection` 等都要声明；直接读未声明的 `ctx.<service>` 会抛
+   `cannot get property "..." without inject`，并让 web boot 报 `entry did not activate`（**不带原因**，极难排查）。
+   `apply` 里的每个注册步骤要单独 try/catch，失败时在页面上留下可见错误，而不是让整个入口挂掉。
 
 ## 开发命令
 
