@@ -36,9 +36,9 @@ This plugin moves that into DeepSeek Harness:
 ## What it looks like
 
 <p align="center">
-  <img src="assets/preview-popover.png" alt="Popover and floating capsule" width="46%" />
-  &nbsp;&nbsp;
-  <img src="assets/preview-settings.png" alt="Settings page" width="52%" />
+  <img src="assets/preview-popover.png" alt="Popover and floating capsule" width="45%" />
+  &nbsp;
+  <img src="assets/preview-settings.png" alt="Settings page" width="50%" />
 </p>
 
 <p align="center"><sub>Left: the panel · Right: Settings → Command Code</sub></p>

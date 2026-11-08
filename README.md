@@ -36,9 +36,9 @@
 ## 长什么样
 
 <p align="center">
-  <img src="assets/preview-popover.png" alt="浮层与浮窗胶囊" width="46%" />
-  &nbsp;&nbsp;
-  <img src="assets/preview-settings.png" alt="设置页" width="52%" />
+  <img src="assets/preview-popover.png" alt="浮层与浮窗胶囊" width="45%" />
+  &nbsp;
+  <img src="assets/preview-settings.png" alt="设置页" width="50%" />
 </p>
 
 <p align="center"><sub>左：点开胶囊后的面板 · 右：设置里的 Command Code 页面</sub></p>
