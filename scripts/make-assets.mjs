@@ -134,7 +134,7 @@ function banner() {
   parts.push(rect({ x: cardX, y: cardY, w: cardW, h: 300, r: 26, fill: 'rgba(26,32,29,0.72)', stroke: 'rgba(255,255,255,0.12)', sw: 1.5 }))
   parts.push(logo(cardX + 26, cardY + 24, 44, 11))
   parts.push(text({ x: cardX + 84, y: cardY + 46, size: 24, weight: 700 }, 'Command Code'))
-  parts.push(text({ x: cardX + 84, y: cardY + 74, size: 16, fill: P.muted }, '@miko'))
+  parts.push(text({ x: cardX + 84, y: cardY + 74, size: 16, fill: P.muted }, '@demo'))
   parts.push(iconBtn(cardX + cardW - 96, cardY + 30, 30, '⟳'))
   parts.push(iconBtn(cardX + cardW - 56, cardY + 30, 30, '✕'))
   parts.push(text({ x: cardX + 26, y: cardY + 132, size: 15, weight: 700, fill: P.muted, spacing: 1.5 }, '套餐额度'))
@@ -195,7 +195,7 @@ function popover() {
   // header
   parts.push(logo(left, headerTop, 88, 22))
   parts.push(text({ x: left + 112, y: headerTop + 40, size: 40, weight: 700 }, 'Command Code'))
-  parts.push(text({ x: left + 114, y: headerTop + 80, size: 30, fill: P.muted }, '@miko'))
+  parts.push(text({ x: left + 114, y: headerTop + 80, size: 30, fill: P.muted }, '@demo'))
   parts.push(iconBtn(cx + cw - pad - 76, headerTop + 28, 34, '⟳'))
   parts.push(iconBtn(cx + cw - pad - 34, headerTop + 28, 34, '✕'))
 
@@ -306,7 +306,7 @@ function settings() {
   // page header
   parts.push(logo(x, 66, 96, 24))
   parts.push(text({ x: x + 124, y: 126, size: 44, weight: 700 }, 'Command Code'))
-  parts.push(text({ x: x + 126, y: 166, size: 28, fill: P.muted }, '@miko'))
+  parts.push(text({ x: x + 126, y: 166, size: 28, fill: P.muted }, '@demo'))
   parts.push(rect({ x: x + 470, y: 94, w: 108, h: 46, r: 23, fill: 'rgba(18,184,134,0.14)', stroke: 'rgba(18,184,134,0.35)', sw: 1.5 }))
   parts.push(text({ x: x + 524, y: 125, size: 24, weight: 700, fill: P.teal, anchor: 'middle' }, 'GOAT'))
   parts.push(text({ x: x + w - 120, y: 125, size: 26, fill: P.dim, anchor: 'end' }, '更新于 刚刚'))

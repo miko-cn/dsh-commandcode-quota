@@ -54,7 +54,7 @@ const sampleReport = {
   ok: true,
   fetchedAt: new Date().toISOString(),
   keySource: 'test',
-  account: { userName: 'miko', name: 'Mi No', email: 'x@example.com' },
+  account: { userName: 'demo', name: 'Demo User', email: 'x@example.com' },
   org: null,
   plan: { id: 'individual-goat', name: 'GOAT', credits: 70, fiveHourCap: 14, weeklyCap: 35, source: 'detected', known: true },
   credits: { remaining: 68.17, used: 1.83, purchased: 0, free: 0, total: 70, percent: 2.6, belowThreshold: false },
