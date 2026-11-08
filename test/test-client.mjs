@@ -225,9 +225,26 @@ await new Promise((resolve) => setTimeout(resolve, 60))
 const settingsTree = paint(settings)
 const settingsText = collectText(settingsTree)
 console.log('settings text:', settingsText)
-for (const expected of ['套餐额度', 'GOAT', '68.17', '2.3K', '100%', '$1.81', '230.3M', '用量窗口', 'API key', '浮窗']) {
+for (const expected of ['套餐额度', 'GOAT', '68.17', '2.3K', '100%', '$1.81', '230.3M', '用量窗口', 'API key', '浮窗', '在 GitHub 上 Star', '自动刷新间隔']) {
   if (!settingsText.includes(expected)) throw new Error(`settings page is missing ${expected}`)
 }
+const starButton = findNodes(settingsTree, (node) => node.props && node.props.className === 'dcq-star-btn')[0]
+if (!starButton) throw new Error('star card button not found')
+if (starButton.props.href !== 'https://github.com/miko-cn/dsh-commandcode-quota') throw new Error(`star card links to ${starButton.props.href}`)
+
+// Widget card: a DSH-shaped switch for visibility and a slider for the
+// capsule's background refresh interval in whole minutes (1..30).
+const widgetToggle = findNodes(settingsTree, (node) => node.tag === 'button' && node.props && node.props.className === 'dcq-toggle')[0]
+if (!widgetToggle) throw new Error('floating-widget toggle not found')
+if (widgetToggle.props['aria-checked'] !== 'true') throw new Error('floating-widget toggle should start on')
+const refreshRange = findNodes(settingsTree, (node) => node.tag === 'input' && node.props && node.props.className === 'dcq-range')[0]
+if (!refreshRange) throw new Error('refresh-interval slider not found')
+if (String(refreshRange.props.value) !== '5') throw new Error(`refresh slider starts at ${refreshRange.props.value}, expected 5`)
+if (String(refreshRange.props.min) !== '1' || String(refreshRange.props.max) !== '10') throw new Error(`refresh slider range is ${refreshRange.props.min}..${refreshRange.props.max}, expected 1..10`)
+refreshRange.props.onChange({ target: { value: '10' } })
+const settingsTree2 = paint(settings)
+const range2 = findNodes(settingsTree2, (node) => node.tag === 'input' && node.props && node.props.className === 'dcq-range')[0]
+if (String(range2.props.value) !== '10') throw new Error(`refresh slider did not take 10, got ${range2.props.value}`)
 
 // Floating widget: the mount effect places it, the second paint renders the pill.
 paint(floating)

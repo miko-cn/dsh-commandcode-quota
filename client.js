@@ -37,6 +37,7 @@ window.__ModuleLoader__.load({
     const REPORT = '/dsh-commandcode/api/report'
     const KEY = '/dsh-commandcode/api/key'
     const STUDIO = 'https://commandcode.ai/usage'
+    const REPO = 'https://github.com/miko-cn/dsh-commandcode-quota'
     // Official Command Code symbol (white mark on the black tile), 160px, inlined
     // so the client bundle needs no asset route.
     const LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAYAAACLz2ctAAAACXBIWXMAACE4AAAhOAFFljFgAAAaSklEQVR42u2dZ7AURbTHMWdFMYGR5BdFxYhKssyKOWBATIiKocrCWJTZMmf9YJVlQgVFwDJgwpwToliAWRRFFLOiGOfVb97733e2d3Z27t2e3Vlub9WphXvvTJ8+/e/u06dP6NChQ4coUKAG0V8dghACBQAGCgAMFCgAMFAAYKBAAYCBAgADBQoADBQAGChQAGCgAMBAgQIAAwUABgoUABgoALA90SKLLNImCrJbyAHIIC+66KIxLbbYYq0mPQvlAaS0d9q2a+G9yYHeHABMGqSwwpQCPQmgAYAeBFoJaPx8pZVWitZff/1o4403jvr27RsNGjQoGjp0aHTKKadEo0aNii699NLohhtuiG655Zbo7rvvju6///7owQcfjB577LHoqaeeip555pno+eefj1588cXopZdeil5++eXo1Vdfjem1115roTfeeKNNZN+h99IGbdEmbcMDvMATvMHjXXfdFfMM7/SBvpx88slx3/bcc8+4r5tssknc9xVXXDFVRgWfsMUCYNLMRXBrrbVW1L9//2jYsGHR1VdfHT300EPRlClTok8//TT64Ycfor///jtqb59//vkn7jsyQBbIBNkce+yxsayQmQs67SQBgAmz1P5sjTXWiPbZZ5/o+uuvj1eS7777LtOAtBf6999/U2Xx33//xTJDdtddd10sy9VXX71F3prsBVgVGwtAK4Tlllsu2m+//eItaN68eWVCReisdEmDAen//I1LSX8vYrAaSS4/lte0viT9fRpAkSmyRcbI2h7i2h0A7VbQsWPH6LTTTos+/vjjltmrFU0Ct8LWz/R34fO/MkMmf/31V0V5Wdl+9NFH0ciRI2PZazwaBMT6A1Ad5Rudbvbs2SVCtALUrE/bdn/99dfos88+i956661o8uTJ8Sy/7bbbWhT4c845Jwb4SSedFOtHRxxxRHTooYdGBx54YLTvvvvGSv0ee+wR7bbbbtEuu+wS7bzzztGOO+4Y7bDDDjFtv/32NZHewzt5N23Q1u677x63DQ/wAk/wBo/wCs/wroMUfRo/fnzcR/o6a9asuO9p27EAaOVpJy+yP/roo1vGpAH6YX0BuPjii8ff3bp1iwUp4ElI+rdmrBUkAn/kkUdi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'
@@ -44,6 +45,18 @@ window.__ModuleLoader__.load({
     const POS_KEY = 'dcq.capsule.position'
     const HIDDEN_KEY = 'dcq.capsule.hidden'
     const PLAN_KEY = 'dcq.plan.override'
+    // Background refresh of the floating capsule. Minutes, clamped so the
+    // upstream 4-request round is never hammered harder than once a minute.
+    const REFRESH_KEY = 'dcq.capsule.refreshMs'
+    const REFRESH_MIN = 60000
+    const REFRESH_MAX = 600000
+    const REFRESH_DEFAULT = 300000
+    function clampRefresh(ms) {
+      const value = Number(ms)
+      if (!Number.isFinite(value)) return REFRESH_DEFAULT
+      const minutes = Math.round(value / 60000)
+      return Math.min(REFRESH_MAX, Math.max(REFRESH_MIN, minutes * 60000))
+    }
 
     const zh = {
       button: 'Command Code',
@@ -110,10 +123,16 @@ window.__ModuleLoader__.load({
       widget: '浮窗',
       widgetShow: '显示桌面浮窗',
       widgetHint: '关闭后可通过此设置重新打开',
+      widgetRefresh: '自动刷新间隔',
+      refreshUnit: '分钟',
+      refreshHint: '浮窗后台多久拉一次数据，改完立即生效',
       collapsed: '收起',
       expand: '展开',
-      settingsHint: '完整数据与设置见 设置 → Command Code',
-      autoRefresh: '每分钟自动刷新',
+      starTitle: '喜欢这个插件？',
+      starBody: '开源在 GitHub，点个 Star 支持一下。',
+      starCta: '在 GitHub 上 Star',
+      autoRefresh: '本页每分钟自动刷新',
+      periodRange: '本期',
     }
     const en = {
       button: 'Command Code',
@@ -180,10 +199,16 @@ window.__ModuleLoader__.load({
       widget: 'Floating widget',
       widgetShow: 'Show the floating widget',
       widgetHint: 'Turn it back on from this setting',
+      widgetRefresh: 'Refresh interval',
+      refreshUnit: 'min',
+      refreshHint: 'How often the widget fetches in the background; applies immediately',
       collapsed: 'Collapse',
       expand: 'Expand',
-      settingsHint: 'Full data and settings: Settings → Command Code',
-      autoRefresh: 'Refreshes every minute',
+      autoRefresh: 'This page refreshes every minute',
+      periodRange: 'Cycle',
+      starTitle: 'Enjoying this plugin?',
+      starBody: 'It is open source on GitHub — a star helps a lot.',
+      starCta: 'Star on GitHub',
     }
 
     function fallbackT(key) {
@@ -226,8 +251,50 @@ window.__ModuleLoader__.load({
       .dcq-err{color:var(--dsw-alias-state-error-primary)}
       .dcq-spin{width:16px;height:16px;border:2px solid var(--dsw-alias-border-l2);border-top-color:var(--dsw-alias-brand-primary);border-radius:50%;margin:0 auto 8px;animation:dcq-spin .8s linear infinite}
       @keyframes dcq-spin{to{transform:rotate(360deg)}}
-      .dcq-switch{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12.5px}
-      .dcq-switch input{accent-color:var(--dsw-alias-brand-primary)}
+      /* ---- switch: DSH's own geometry (36x20 track, 16px thumb, 120ms slide)
+         so this control reads as the same control as the rest of Settings ---- */
+      .dcq-toggle{box-sizing:border-box;position:relative;flex:0 0 auto;width:36px;height:20px;padding:2px;border:0;border-radius:999px;
+        corner-shape:round;background:var(--dsw-alias-border-l3);cursor:pointer;transition:background 120ms ease}
+      .dcq-toggle[aria-checked="true"]{background:var(--dsw-alias-brand-primary)}
+      .dcq-toggle:focus-visible{outline:var(--dsw-focus-ring-width) solid var(--dsw-focus-ring-color,var(--dsw-alias-state-business-primary));outline-offset:2px}
+      .dcq-toggle-thumb{display:block;width:16px;height:16px;border-radius:50%;corner-shape:round;
+        background:var(--dsw-alias-switch-thumb);transition:transform 120ms ease}
+      .dcq-toggle[aria-checked="true"] .dcq-toggle-thumb{background:var(--dsw-alias-label-primary-foreground);transform:translateX(16px)}
+      /* ---- slider: brand-filled track with a ringed thumb (native range,
+         restyled so WebKit and Gecko both read as a designed control) ---- */
+      .dcq-range{-webkit-appearance:none;appearance:none;width:100%;height:24px;margin:2px 0 0;background:transparent;cursor:pointer}
+      .dcq-range::-webkit-slider-runnable-track{height:6px;border-radius:999px;
+        background:linear-gradient(90deg,var(--dsw-alias-brand-primary) 0 var(--dcq-fill,50%),var(--dsw-alias-bg-layer-2) var(--dcq-fill,50%) 100%)}
+      .dcq-range::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;margin-top:-5px;border-radius:50%;
+        background:var(--dsw-alias-label-primary-foreground);border:2px solid var(--dsw-alias-brand-primary);
+        box-shadow:0 1px 4px rgba(0,0,0,.3);transition:transform 120ms ease}
+      .dcq-range:active::-webkit-slider-thumb{transform:scale(1.12)}
+      .dcq-range::-moz-range-track{height:6px;border-radius:999px;background:var(--dsw-alias-bg-layer-2)}
+      .dcq-range::-moz-range-progress{height:6px;border-radius:999px;background:var(--dsw-alias-brand-primary)}
+      .dcq-range::-moz-range-thumb{width:14px;height:14px;border-radius:50%;border:2px solid var(--dsw-alias-brand-primary);
+        background:var(--dsw-alias-label-primary-foreground);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+      .dcq-range:focus-visible{outline:none}
+      .dcq-range:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px color-mix(in srgb, var(--dsw-alias-brand-primary) 30%, transparent)}
+      .dcq-range:focus-visible::-moz-range-thumb{box-shadow:0 0 0 3px color-mix(in srgb, var(--dsw-alias-brand-primary) 30%, transparent)}
+      .dcq-range-value{min-width:44px;justify-content:center;padding:1px 9px;border-radius:999px;font-size:11px;font-variant-numeric:tabular-nums;
+        background:var(--dsw-alias-bg-layer-2);border:1px solid var(--dsw-alias-border-l1);color:var(--dsw-alias-label-primary)}
+      .dcq-range-scale{display:flex;justify-content:space-between;margin-top:1px;font-size:10.5px;color:var(--dsw-alias-label-secondary);font-variant-numeric:tabular-nums}
+
+      /* ---- star card: one compact promo row at the top of the settings page ---- */
+      .dcq-star{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;
+        border:1px solid var(--dsw-alias-border-l1);
+        background:linear-gradient(120deg, color-mix(in srgb, var(--dsw-alias-brand-primary) 11%, var(--dsw-alias-bg-layer-1)), var(--dsw-alias-bg-layer-1) 62%)}
+      .dcq-star-mark{width:34px;height:34px;flex:none;display:grid;place-items:center;border-radius:10px;
+        color:var(--dsw-alias-brand-primary);background:var(--dsw-alias-bg-layer-2);border:1px solid var(--dsw-alias-border-l1)}
+      .dcq-star-main{flex:1;min-width:0}
+      .dcq-star-title{font-weight:700;font-size:13px}
+      .dcq-star-body{font-size:11.5px;color:var(--dsw-alias-label-secondary);margin-top:2px}
+      .dcq-star-btn{display:inline-flex;align-items:center;gap:6px;flex:none;padding:8px 15px;border-radius:9px;
+        background:var(--dsw-alias-brand-primary);color:var(--dsw-alias-bg-base);text-decoration:none;
+        font-size:12px;font-weight:700;white-space:nowrap;
+        box-shadow:0 3px 12px color-mix(in srgb, var(--dsw-alias-brand-primary) 38%, transparent)}
+      .dcq-star-btn:hover{filter:brightness(1.08)}
+      .dcq-star-btn:focus-visible{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:2px}
 
       /* ---- floating capsule: liquid-glass shell, logo + two progress rows ---- */
       .dcq-float{position:fixed;z-index:${Z_FLOAT};display:flex;align-items:center;gap:10px;padding:9px 14px 9px 10px;border-radius:16px;cursor:grab;
@@ -360,6 +427,7 @@ window.__ModuleLoader__.load({
     store.widgetHidden = readLocal(HIDDEN_KEY) === true
     store.position = readLocal(POS_KEY)
     store.planOverride = readLocal(PLAN_KEY) || ''
+    store.refreshMs = clampRefresh(readLocal(REFRESH_KEY) ?? REFRESH_DEFAULT)
 
     function useStore() {
       const [, force] = React.useState(0)
@@ -782,8 +850,13 @@ window.__ModuleLoader__.load({
             ? h(
                 'div',
                 { className: 'dcq-meta', style: { marginTop: 4 } },
-                h('span', null, `${tr('renew')} ${shortDate(summary.periodEnd) || '—'}${summary.periodEnd ? ` · ${futureText(Date.parse(summary.periodEnd), tr)}` : ''}`),
-                h('span', null, summary.periodStart ? `${shortDate(summary.periodStart)} →` : ''),
+                h(
+                  'span',
+                  null,
+                  summary.periodStart
+                    ? `${tr('periodRange')} ${shortDate(summary.periodStart)} – ${shortDate(summary.periodEnd)} · ${futureText(Date.parse(summary.periodEnd), tr)}`
+                    : `${tr('renew')} ${shortDate(summary.periodEnd)} · ${futureText(Date.parse(summary.periodEnd), tr)}`,
+                ),
               )
             : null,
           credit && (credit.purchased || credit.free)
@@ -843,6 +916,47 @@ window.__ModuleLoader__.load({
       }
       return h(React.Fragment, null, cards)
     }
+    // GitHub's octocat mark, inlined so the promo card needs no remote image.
+    function GitHubMark({ size }) {
+      const s = size || 16
+      return h(
+        'svg',
+        { viewBox: '0 0 16 16', width: s, height: s, fill: 'currentColor', 'aria-hidden': 'true', style: { display: 'block', flex: 'none' } },
+        h('path', {
+          d: 'M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z',
+        }),
+      )
+    }
+
+    // One short line of copy plus a prominent button: the pattern open-source
+    // plugins use to ask for a star without turning Settings into an ad.
+    function StarCard({ tr }) {
+      return h(
+        'div',
+        { className: 'dcq-star' },
+        h(
+          'span',
+          { className: 'dcq-star-mark', 'aria-hidden': 'true' },
+          h(
+            'svg',
+            { viewBox: '0 0 24 24', width: 18, height: 18, fill: 'currentColor', style: { display: 'block' } },
+            h('path', { d: 'M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4 6.2 20.5l1.1-6.5L2.6 9.4l6.5-.9L12 2.6z' }),
+          ),
+        ),
+        h(
+          'div',
+          { className: 'dcq-star-main' },
+          h('div', { className: 'dcq-star-title' }, tr('starTitle')),
+          h('div', { className: 'dcq-star-body' }, tr('starBody')),
+        ),
+        h(
+          'a',
+          { className: 'dcq-star-btn', href: REPO, target: '_blank', rel: 'noreferrer', title: REPO },
+          h(GitHubMark, { size: 14 }),
+          h('span', null, tr('starCta')),
+        ),
+      )
+    }
 
     function LastUpdated({ tr, now, refreshing, onRefresh }) {
       return h(
@@ -870,10 +984,12 @@ window.__ModuleLoader__.load({
 
       const report = store.report
       const hidden = store.widgetHidden
+      const refreshMinutes = Math.round(store.refreshMs / 60000)
 
       return h(
         'div',
         { className: 'dcq-page' },
+        h(StarCard, { tr }),
         h(
           'div',
           { className: 'dcq-card' },
@@ -896,7 +1012,6 @@ window.__ModuleLoader__.load({
             ),
             h(LastUpdated, { tr, now, refreshing: store.refreshing, onRefresh: () => loadReport(true) }),
           ),
-          h('div', { className: 'dcq-note' }, tr('settingsHint')),
         ),
         !report && store.loading
           ? h('div', { className: 'dcq-state' }, h('div', { className: 'dcq-spin' }), tr('loading'))
@@ -914,20 +1029,59 @@ window.__ModuleLoader__.load({
                 { className: 'dcq-card' },
                 h('div', { className: 'dcq-card-head' }, h('div', { className: 'dcq-card-title' }, tr('widget'))),
                 h(
-                  'label',
-                  { className: 'dcq-switch' },
-                  h('input', {
-                    type: 'checkbox',
-                    checked: !hidden,
-                    onChange: (event) => {
-                      const nextHidden = !event.target.checked
-                      store.set({ widgetHidden: nextHidden })
-                      writeLocal(HIDDEN_KEY, nextHidden)
+                  'div',
+                  { className: 'dcq-row', style: { padding: '2px 0' } },
+                  h('span', { className: 'dcq-row-label' }, tr('widgetShow')),
+                  h(
+                    'button',
+                    {
+                      type: 'button',
+                      className: 'dcq-toggle',
+                      role: 'switch',
+                      'aria-checked': hidden ? 'false' : 'true',
+                      'aria-label': tr('widgetShow'),
+                      onClick: () => {
+                        const nextHidden = !store.widgetHidden
+                        store.set({ widgetHidden: nextHidden })
+                        writeLocal(HIDDEN_KEY, nextHidden)
+                      },
                     },
-                  }),
-                  h('span', null, tr('widgetShow')),
+                    h('span', { className: 'dcq-toggle-thumb' }),
+                  ),
                 ),
                 hidden ? h('div', { className: 'dcq-note', style: { marginTop: 6 } }, tr('widgetHint')) : null,
+                h(
+                  'div',
+                  { style: { marginTop: 14, borderTop: '1px solid var(--dsw-alias-border-l1)', paddingTop: 12 } },
+                  h(
+                    'div',
+                    { className: 'dcq-row', style: { padding: 0 } },
+                    h('span', { className: 'dcq-row-label' }, tr('widgetRefresh')),
+                    h('span', { className: 'dcq-meta dcq-range-value' }, `${refreshMinutes} ${tr('refreshUnit')}`),
+                  ),
+                  h('input', {
+                    type: 'range',
+                    className: 'dcq-range',
+                    min: 1,
+                    max: 10,
+                    step: 1,
+                    value: refreshMinutes,
+                    'aria-label': tr('widgetRefresh'),
+                    style: { '--dcq-fill': `${((refreshMinutes - 1) / 9) * 100}%` },
+                    onChange: (event) => {
+                      const next = clampRefresh(Number(event.target.value) * 60000)
+                      store.set({ refreshMs: next })
+                      writeLocal(REFRESH_KEY, next)
+                    },
+                  }),
+                  h(
+                    'div',
+                    { className: 'dcq-range-scale' },
+                    h('span', null, '1'),
+                    h('span', null, '10'),
+                  ),
+                  h('div', { className: 'dcq-note', style: { fontSize: 10.5, marginTop: 4 } }, tr('refreshHint')),
+                ),
               ),
               h(KeyCard, { tr }),
               store.error ? h('div', { className: 'dcq-card' }, h('div', { className: 'dcq-note dcq-err' }, `${tr('error')}: ${store.error}`)) : null,
@@ -969,8 +1123,9 @@ window.__ModuleLoader__.load({
       }, [])
 
       React.useEffect(() => {
-        // First paint must not wait for the 5-minute beat: load immediately, and
-        // refresh when the page comes back to the foreground.
+        // First paint must not wait for the beat: load immediately, and refresh
+        // when the page comes back to the foreground. The interval itself is
+        // user-configurable in Settings (default 5 minutes).
         if (!store.report && !store.loading) loadReport(false)
         const onVisible = () => {
           if (document.visibilityState === 'visible') loadReport(false)
@@ -978,12 +1133,12 @@ window.__ModuleLoader__.load({
         document.addEventListener('visibilitychange', onVisible)
         const timer = setInterval(() => {
           if (document.visibilityState === 'visible') loadReport(false)
-        }, 300000)
+        }, store.refreshMs)
         return () => {
           clearInterval(timer)
           document.removeEventListener('visibilitychange', onVisible)
         }
-      }, [])
+      }, [store.refreshMs])
 
       React.useEffect(() => {
         if (!store.popoverOpen) return undefined
