@@ -3,15 +3,18 @@
  *
  * Reads Command Code's own account endpoints with the API key the CLI or the
  * DSH provider already uses, reshapes them into one report, and serves that
- * report on a same-origin route the browser half reads:
+ * report on same-origin routes the browser half reads:
  *
- *   GET /dsh-commandcode/api/report[?refresh=1]
+ *   GET  /dsh-commandcode/api/report[?refresh=1]
+ *   GET  /dsh-commandcode/api/key          → key status (never the value)
+ *   POST /dsh-commandcode/api/key          → { apiKey } or { clear: true }
  *
  * Endpoints (same ones the `cmd` CLI's /usage view calls):
  *   /alpha/whoami, /alpha/billing/credits, /alpha/billing/subscriptions,
  *   /alpha/usage/summary?since=<billing period start>
  *
- * The key never reaches the browser: the client only sees the shaped report.
+ * The key never reaches the browser: the client only sees the shaped report and
+ * the key's status (configured / source / writable).
  */
 
 import { readFileSync } from 'node:fs'
@@ -47,7 +50,9 @@ const DEFAULTS = {
   timeoutMs: 12000,
 }
 
-const ROUTE = '/dsh-commandcode/api/report'
+const REPORT_ROUTE = '/dsh-commandcode/api/report'
+const KEY_ROUTE = '/dsh-commandcode/api/key'
+const KEY_NAMES = ['COMMAND_CODE_API_KEY', 'COMMANDCODE_API_KEY', 'COMMAND_API_KEY']
 
 function planFor(planId) {
   if (!planId) return null
@@ -61,48 +66,108 @@ function planFor(planId) {
   return hit ? { id, ...PLANS[hit] } : null
 }
 
-function keyFromCredentialsYaml(raw) {
-  for (const envName of ['COMMAND_CODE_API_KEY', 'COMMANDCODE_API_KEY', 'COMMAND_API_KEY']) {
-    const match = new RegExp(`(?:^|\\s)${envName}:\\s*['"]?([^'"\\s]+)`).exec(raw)
-    if (match) return match[1]
-  }
-  return ''
-}
-
-function keyFromCliAuth() {
+function cliAuthFile() {
   for (const file of [join(homedir(), '.commandcode', 'auth.json'), join(homedir(), '.commandcode', 'credentials.json')]) {
     try {
       const parsed = JSON.parse(readFileSync(file, 'utf8'))
       const key = parsed?.apiKey ?? parsed?.api_key ?? parsed?.key ?? parsed?.token
-      if (typeof key === 'string' && key.length > 8) return key
+      if (typeof key === 'string' && key.length > 8) return { key, file }
     } catch {
       /* not logged in / not installed */
     }
   }
-  return ''
+  return null
 }
 
-/** Config first, then the conventional env vars, then the CLI's and DSH's own stores. */
-function resolveApiKey(config) {
-  if (typeof config.apiKey === 'string' && config.apiKey.trim()) {
-    return { key: config.apiKey.trim(), source: 'plugin config' }
-  }
-  const envNames = [config.apiKeyEnv || DEFAULTS.apiKeyEnv, 'COMMANDCODE_API_KEY', 'COMMAND_API_KEY']
-  for (const envName of envNames) {
-    if (!envName) continue
-    const value = process.env[envName]
-    if (typeof value === 'string' && value.trim()) return { key: value.trim(), source: `env ${envName}` }
-  }
-  const fromCli = keyFromCliAuth()
-  if (fromCli) return { key: fromCli, source: '~/.commandcode/auth.json' }
+/** Raw YAML scan used only when the credentials service is unavailable. */
+function keyFromCredentialsFile() {
   try {
     const raw = readFileSync(join(homedir(), '.dsh', '.credentials.yaml'), 'utf8')
-    const fromStore = keyFromCredentialsYaml(raw)
-    if (fromStore) return { key: fromStore, source: '~/.dsh/.credentials.yaml' }
+    for (const name of KEY_NAMES) {
+      const match = new RegExp(`(?:^|\\s)${name}:\\s*['"]?([^'"\\s]+)`).exec(raw)
+      if (match) return { key: match[1], source: '~/.dsh/.credentials.yaml' }
+    }
   } catch {
     /* no credential store */
   }
+  return null
+}
+
+function credentialsOf(ctx) {
+  const direct = ctx.get?.('credentials') ?? ctx.credentials
+  return direct && typeof direct.resolve === 'function' ? direct : null
+}
+
+/**
+ * Config first, then the DSH credential store (stored value outranks the
+ * environment by design), then the CLI's own login file.
+ */
+async function resolveApiKey(ctx, config) {
+  if (typeof config.apiKey === 'string' && config.apiKey.trim()) {
+    return { key: config.apiKey.trim(), source: 'plugin config' }
+  }
+  const names = [config.apiKeyEnv || DEFAULTS.apiKeyEnv, ...KEY_NAMES].filter(Boolean)
+  const credentials = credentialsOf(ctx)
+  if (credentials) {
+    for (const credentialName of [...new Set(names)]) {
+      try {
+        const hit = await credentials.resolve(credentialName)
+        if (hit?.value) return { key: hit.value, source: hit.source || `credential ${credentialName}` }
+      } catch {
+        /* try the next name */
+      }
+    }
+  }
+  const fromCli = cliAuthFile()
+  if (fromCli) return { key: fromCli.key, source: '~/.commandcode/auth.json' }
+  const fromFile = keyFromCredentialsFile()
+  if (fromFile) return fromFile
   return { key: '', source: '' }
+}
+
+async function keyStatus(ctx, config) {
+  const credentials = credentialsOf(ctx)
+  const names = [...new Set([config.apiKeyEnv || DEFAULTS.apiKeyEnv, ...KEY_NAMES].filter(Boolean))]
+  const entries = []
+  if (credentials && typeof credentials.describe === 'function') {
+    for (const credentialName of names) {
+      try {
+        const info = await credentials.describe(credentialName)
+        entries.push({ name: credentialName, configured: info?.configured === true, source: info?.source ?? null, writable: info?.writable === true })
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+  const resolved = await resolveApiKey(ctx, config)
+  return {
+    ok: true,
+    configured: Boolean(resolved.key),
+    source: resolved.source || null,
+    writable: entries.some((entry) => entry.writable),
+    candidates: entries,
+    cliAuthFile: cliAuthFile() ? '~/.commandcode/auth.json' : null,
+    envAvailable: names.filter((name) => Boolean(process.env[name])),
+    storedName: names[0],
+    configKey: typeof config.apiKey === 'string' && config.apiKey.length > 0,
+  }
+}
+
+async function saveKey(ctx, config, body) {
+  const credentials = credentialsOf(ctx)
+  if (!credentials || typeof credentials.set !== 'function') {
+    return { ok: false, error: 'credentials service unavailable; set the key with the cmd CLI or in the environment' }
+  }
+  const storedName = (config.apiKeyEnv || DEFAULTS.apiKeyEnv) || 'COMMAND_CODE_API_KEY'
+  if (body.clear === true) {
+    await credentials.unset(storedName)
+    return { ok: true, cleared: true, ...(await keyStatus(ctx, config)) }
+  }
+  const value = typeof body.apiKey === 'string' ? body.apiKey.trim() : ''
+  if (!value) return { ok: false, error: 'apiKey is empty' }
+  if (value.length < 8 || /\s/.test(value)) return { ok: false, error: 'apiKey does not look like a Command Code key' }
+  await credentials.set(storedName, value)
+  return { ok: true, ...(await keyStatus(ctx, config)) }
 }
 
 async function fetchJson(base, path, key, timeoutMs) {
@@ -128,14 +193,15 @@ function round(value, digits = 4) {
   return typeof value === 'number' && Number.isFinite(value) ? Number(value.toFixed(digits)) : null
 }
 
-async function buildReport(config) {
-  const { key, source } = resolveApiKey(config)
+async function buildReport(ctx, config, overridePlan) {
+  const { key, source } = await resolveApiKey(ctx, config)
   if (!key) {
     return {
       ok: false,
       code: 'no-key',
       fetchedAt: new Date().toISOString(),
       error: 'no Command Code API key',
+      keySource: null,
     }
   }
 
@@ -148,7 +214,7 @@ async function buildReport(config) {
     return null
   })
   if (whoami === null && failures.length > 0) {
-    return { ok: false, code: 'auth', fetchedAt: new Date().toISOString(), error: failures.join('; ') }
+    return { ok: false, code: 'auth', fetchedAt: new Date().toISOString(), error: failures.join('; '), keySource: source }
   }
 
   const orgId = whoami?.org?.id ?? null
@@ -174,9 +240,9 @@ async function buildReport(config) {
   })
 
   const detectedId = subscriptionData?.planId ?? null
-  const overrideId = typeof config.planOverride === 'string' ? config.planOverride.trim() : ''
+  const overrideId = (overridePlan || (typeof config.planOverride === 'string' ? config.planOverride : '')).trim()
   const plan = planFor(overrideId || detectedId)
-  const source_ = overrideId ? 'override' : 'detected'
+  const planSource = overrideId ? 'override' : 'detected'
 
   const creditBlock = credits?.credits ?? null
   const remaining = round(creditBlock?.monthlyCredits)
@@ -221,7 +287,7 @@ async function buildReport(config) {
           credits: plan.credits,
           fiveHourCap: plan.fiveHour,
           weeklyCap: plan.weekly,
-          source: source_,
+          source: planSource,
           detectedId,
           overrideId: overrideId || null,
           known: true,
@@ -230,7 +296,7 @@ async function buildReport(config) {
           id: detectedId || overrideId || null,
           name: detectedId || overrideId || 'Unknown',
           credits: null,
-          source: source_,
+          source: planSource,
           detectedId,
           overrideId: overrideId || null,
           known: false,
@@ -280,19 +346,37 @@ function sendJson(response, status, payload) {
   response.end(JSON.stringify(payload))
 }
 
+async function readJsonBody(request, limit = 8192) {
+  const chunks = []
+  let size = 0
+  for await (const chunk of request) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)
+    size += buffer.length
+    if (size > limit) throw new Error('request body too large')
+    chunks.push(buffer)
+  }
+  if (chunks.length === 0) return {}
+  return JSON.parse(Buffer.concat(chunks).toString('utf8'))
+}
+
 export function apply(ctx, rawConfig) {
   const config = { ...DEFAULTS, ...(rawConfig || {}) }
   const cacheMs = Number(config.cacheMs) > 0 ? Number(config.cacheMs) : DEFAULTS.cacheMs
-  let cache = { at: 0, report: null }
+  let cache = { at: 0, report: null, plan: '' }
   let inflight = null
 
-  const loadReport = async (force) => {
+  const invalidate = () => {
+    cache = { at: 0, report: null, plan: '' }
+  }
+
+  const loadReport = async (force, plan) => {
+    const override = plan || ''
     const now = Date.now()
-    if (!force && cache.report && now - cache.at < cacheMs) return cache.report
+    if (!force && cache.report && cache.plan === override && now - cache.at < cacheMs) return cache.report
     if (inflight) return inflight
-    inflight = buildReport(config)
+    inflight = buildReport(ctx, config, override)
       .then((report) => {
-        cache = { at: Date.now(), report }
+        if (report.ok) cache = { at: Date.now(), report, plan: override }
         return report
       })
       .finally(() => {
@@ -312,39 +396,77 @@ export function apply(ctx, rawConfig) {
     return name === '127.0.0.1' || name === 'localhost' || name === '[::1]'
   }
 
-  const dispose = ctx.webServer.register({
-    kind: 'exact',
-    path: ROUTE,
-    handler: (request, response) => {
-      // Resolved per request: the connection service may mount after this plugin.
-      const gate = gateOf()
-      if (gate) {
-        let status
-        try {
-          status = gate(request)
-        } catch {
-          status = 403
-        }
-        if (status !== undefined && status !== null) {
-          sendJson(response, status, { ok: false, code: 'unadmitted', error: 'request rejected by the host' })
+  const admit = (request, response) => {
+    // Resolved per request: the connection service may mount after this plugin.
+    const gate = gateOf()
+    if (gate) {
+      let status
+      try {
+        status = gate(request)
+      } catch {
+        status = 403
+      }
+      if (status !== undefined && status !== null) {
+        sendJson(response, status, { ok: false, code: 'unadmitted', error: 'request rejected by the host' })
+        return false
+      }
+      return true
+    }
+    const host = request.headers?.host
+    if (!isLoopbackHost(host) || request.headers?.['sec-fetch-site'] === 'cross-site') {
+      sendJson(response, 403, { ok: false, code: 'unadmitted', error: 'request rejected: not a loopback request' })
+      return false
+    }
+    return true
+  }
+
+  const disposers = [
+    ctx.webServer.register({
+      kind: 'exact',
+      path: REPORT_ROUTE,
+      handler: (request, response) => {
+        if (!admit(request, response)) return
+        if ((request.method || 'GET').toUpperCase() !== 'GET') {
+          response.writeHead(405, { allow: 'GET' })
+          response.end()
           return
         }
-      } else if (!isLoopbackHost(request.headers?.host) || request.headers?.['sec-fetch-site'] === 'cross-site') {
-        sendJson(response, 403, { ok: false, code: 'unadmitted', error: 'request rejected: not a loopback request' })
-        return
-      }
-      if ((request.method || 'GET').toUpperCase() !== 'GET') {
-        response.writeHead(405, { allow: 'GET' })
-        response.end()
-        return
-      }
-      const url = new URL(request.url || ROUTE, 'http://localhost')
-      const force = url.searchParams.get('refresh') === '1'
-      loadReport(force)
-        .then((report) => sendJson(response, 200, report))
-        .catch((error) => sendJson(response, 502, { ok: false, code: 'fetch', error: String(error?.message || error) }))
-    },
-  })
+        const url = new URL(request.url || REPORT_ROUTE, 'http://localhost')
+        const force = url.searchParams.get('refresh') === '1'
+        const plan = url.searchParams.get('plan') || ''
+        loadReport(force, plan)
+          .then((report) => sendJson(response, 200, report))
+          .catch((error) => sendJson(response, 502, { ok: false, code: 'fetch', error: String(error?.message || error) }))
+      },
+    }),
+    ctx.webServer.register({
+      kind: 'exact',
+      path: KEY_ROUTE,
+      handler: async (request, response) => {
+        if (!admit(request, response)) return
+        const method = (request.method || 'GET').toUpperCase()
+        try {
+          if (method === 'GET') {
+            sendJson(response, 200, await keyStatus(ctx, config))
+            return
+          }
+          if (method === 'POST') {
+            const body = await readJsonBody(request)
+            const result = await saveKey(ctx, config, body)
+            invalidate()
+            sendJson(response, result.ok ? 200 : 400, result)
+            return
+          }
+          response.writeHead(405, { allow: 'GET, POST' })
+          response.end()
+        } catch (error) {
+          sendJson(response, 400, { ok: false, error: String(error?.message || error) })
+        }
+      },
+    }),
+  ]
 
-  ctx.effect(() => dispose)
+  ctx.effect(() => () => {
+    for (const dispose of disposers) dispose()
+  })
 }
