@@ -44,6 +44,8 @@ window.__ModuleLoader__.load({
       hourUnit: '小时',
       minuteUnit: '分',
       periodEnded: '已到期',
+      shortLoading: '载入中…',
+      shortError: '读取失败',
       noWindows: '按量计费套餐，没有 5 小时 / 每周窗口限制',
       period: '本期请求',
       requests: '请求',
@@ -112,6 +114,8 @@ window.__ModuleLoader__.load({
       hourUnit: 'h',
       minuteUnit: 'm',
       periodEnded: 'ended',
+      shortLoading: 'loading…',
+      shortError: 'load failed',
       noWindows: 'Pay-as-you-go plan: no 5-hour or weekly windows',
       period: 'Requests this period',
       requests: 'requests',
@@ -233,6 +237,11 @@ window.__ModuleLoader__.load({
       .dcq-float-row{display:flex;align-items:center;gap:7px;line-height:1;font-variant-numeric:tabular-nums}
       .dcq-float-tag{width:18px;flex:none;color:var(--dsw-alias-label-secondary);font-size:9.5px;font-weight:700;letter-spacing:.3px;text-align:left}
       .dcq-float-track{flex:1;height:7px;border-radius:999px;background:color-mix(in srgb, var(--dsw-alias-bg-base) 55%, transparent);overflow:hidden;box-shadow:inset 0 1px 1px rgba(0,0,0,.2)}
+      .dcq-float-track.dcq-skel{position:relative;overflow:hidden;background:var(--dsw-alias-bg-layer-2)}
+      .dcq-float-track.dcq-skel::after{content:"";position:absolute;inset:0;transform:translateX(-100%);
+        background:linear-gradient(90deg, transparent, rgba(255,255,255,.24), transparent);animation:dcq-shimmer 1.2s ease-in-out infinite}
+      @keyframes dcq-shimmer{to{transform:translateX(100%)}}
+      .dcq-float-err{color:var(--dsw-alias-state-error-primary)}
       .dcq-float-fill{display:block;height:100%;border-radius:999px;transition:width .5s ease;box-shadow:0 0 8px rgba(18,184,134,.45)}
       .dcq-float-pct{min-width:27px;text-align:right;color:var(--dsw-alias-label-secondary);font-size:10px}
       .dcq-float-credit{font-size:11px;color:var(--dsw-alias-label-secondary);font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -942,10 +951,20 @@ window.__ModuleLoader__.load({
       }, [])
 
       React.useEffect(() => {
+        // First paint must not wait for the 5-minute beat: load immediately, and
+        // refresh when the page comes back to the foreground.
+        if (!store.report && !store.loading) loadReport(false)
+        const onVisible = () => {
+          if (document.visibilityState === 'visible') loadReport(false)
+        }
+        document.addEventListener('visibilitychange', onVisible)
         const timer = setInterval(() => {
           if (document.visibilityState === 'visible') loadReport(false)
         }, 300000)
-        return () => clearInterval(timer)
+        return () => {
+          clearInterval(timer)
+          document.removeEventListener('visibilitychange', onVisible)
+        }
       }, [])
 
       React.useEffect(() => {
@@ -1069,6 +1088,31 @@ window.__ModuleLoader__.load({
                   { className: 'dcq-float-row' },
                   h('span', { className: 'dcq-float-credit' }, `${credits(credit.remaining)} / ${credits(credit.total)}`),
                 )
+              : null,
+            !five && !week && !credit
+              ? store.error
+                ? h(
+                    'span',
+                    { className: 'dcq-float-row' },
+                    h('span', { className: 'dcq-float-tag' }, '!'),
+                    h('span', { className: 'dcq-float-credit dcq-float-err' }, tr('shortError')),
+                  )
+                : [
+                    h(
+                      'span',
+                      { className: 'dcq-float-row', key: 'placeholder-5h' },
+                      h('span', { className: 'dcq-float-tag' }, '5h'),
+                      h('span', { className: 'dcq-float-track dcq-skel' }),
+                      h('span', { className: 'dcq-float-pct' }, '—'),
+                    ),
+                    h(
+                      'span',
+                      { className: 'dcq-float-row', key: 'placeholder-w' },
+                      h('span', { className: 'dcq-float-tag' }, 'W'),
+                      h('span', { className: 'dcq-float-track dcq-skel' }),
+                      h('span', { className: 'dcq-float-pct' }, '—'),
+                    ),
+                  ]
               : null,
           ),
           h('span', { className: 'dcq-float-dot', 'data-loading': store.refreshing || store.loading ? '1' : '0' }),

@@ -41,6 +41,8 @@ const created = []
 const storage = new Map()
 const documentStub = {
   visibilityState: 'visible',
+  addEventListener() {},
+  removeEventListener() {},
   getElementById: () => null,
   createElement: () => {
     const node = { id: '', textContent: '', remove() {} }
