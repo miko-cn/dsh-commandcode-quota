@@ -56,7 +56,7 @@ dsh plugin --profile <profile> add @yumiku/dsh-commandcode-quota
 ### 2. 填 API key（多数人不需要）
 
 - 如果你用过 `cmd login`，或者 DSH 本身正在用 Command Code 当模型供应商，插件会自动复用，**跳过这步**。
-- 否则：**设置 → Command Code → API key**，粘贴一个 Command Code API key 保存即可。
+- 否则：**设置 → Command Code → API key**，或者点开浮窗直接粘贴保存（没配 key 时浮窗里就有输入框）。
 
 key 只存在 DSH 的凭据库里：不写配置文件，也不会发给浏览器页面。
 
@@ -85,7 +85,7 @@ https://raw.githubusercontent.com/miko-cn/dsh-commandcode-quota/main/market/inde
 
 ### 套餐额度
 
-Command Code 的月额度是一个池子。面板显示「剩余 / 总额度 credits」、已用百分比，以及**本期的起止时间和距离续费还剩多久**（比如「本期 11/3 – 12/3 · 还剩 25 天 1 小时」）。额度按月重置、不结转；额外买的额度、赠送的额度会单独列出。
+Command Code 的月额度是一个池子。面板显示「剩余 / 总额度 credits」、已用百分比，以及**本期的起止时间和距离续费还剩多久**（比如「本期 11/3 – 12/3 · 还剩 25d 1h」）。额度按月重置、不结转；额外买的额度、赠送的额度会单独列出。
 
 ### 5 小时 / 每周窗口
 
@@ -111,6 +111,7 @@ Command Code 除了月额度，还有两道「限速」：**任意 5 小时**、
 - 拖到任意位置，位置会记住；
 - 启动时自动加载（先显示骨架条，不会一直空着）；
 - 从别的窗口切回 DSH 时会自动刷新；
+- 额度或窗口用到 70% 时浮窗变琥珀色、90% 时变红色；
 - 不想看可以在设置页里关掉。
 
 ## 常见问题

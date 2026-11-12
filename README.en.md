@@ -56,7 +56,7 @@ Or ask the agent in a DSH session to run `plugin_manager` → `install_bundle` w
 ### 2. Add an API key (usually not needed)
 
 - If you have signed in with `cmd login`, or DSH already uses Command Code as its model provider, the plugin reuses that key — **skip this step**.
-- Otherwise: **Settings → Command Code → API key**, paste a Command Code API key and save.
+- Otherwise: **Settings → Command Code → API key**, or open the floating capsule and paste it right there (the capsule shows the field when no key is configured).
 
 The key lives in the DSH credential store only — never in config files, never sent to the browser.
 
@@ -111,6 +111,7 @@ The plugin detects your plan automatically (Go / GOAT / Pro / Max / Ultra / Team
 - Drag it anywhere; the position is remembered;
 - loads on startup (skeleton bars first, never silently empty);
 - refreshes when you switch back to DSH;
+- turns amber at 70% and red at 90% for credits or either window;
 - hide it from the Settings page if you prefer.
 
 ## FAQ
