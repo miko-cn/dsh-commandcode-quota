@@ -104,10 +104,15 @@ const sampleKey = {
 }
 
 let fetchCalls = 0
-globalThis.fetch = async (url) => {
+let reportMode = 'no-key'
+const requests = []
+globalThis.fetch = async (url, options) => {
   fetchCalls += 1
-  const body = String(url).includes('/api/key') ? sampleKey : sampleReport
-  return { ok: true, status: 200, json: async () => body }
+  requests.push({ url: String(url), method: (options && options.method) || 'GET' })
+  const target = String(url)
+  if (target.includes('/api/key')) return { ok: true, status: 200, json: async () => sampleKey }
+  if (reportMode === 'no-key') return { ok: true, status: 200, json: async () => ({ ok: false, code: 'no-key', error: 'no key' }) }
+  return { ok: true, status: 200, json: async () => sampleReport }
 }
 
 let loaded = null
@@ -218,6 +223,49 @@ function findNodes(tree, predicate, found = []) {
   for (const child of tree.children || []) findNodes(child, predicate, found)
   return found
 }
+
+// ---- first run: with no key, the popover must offer the field itself ----
+// The old empty state said "enter one below" while the popover had no field
+// below it; a new user could not tell where the key went.
+const clickEvent = { button: 0, clientX: 10, clientY: 10, pointerId: 1, currentTarget: { setPointerCapture() {}, releasePointerCapture() {} } }
+paint(floating)
+await new Promise((resolve) => setTimeout(resolve, 30))
+let firstRunTree = paint(floating)
+const firstRunCapsule = findNodes(firstRunTree, (node) => node.props && node.props.className === 'dcq-float')[0]
+if (!firstRunCapsule) throw new Error('capsule did not paint on the no-key path')
+firstRunCapsule.props.onPointerDown(clickEvent)
+firstRunCapsule.props.onPointerUp(clickEvent)
+await new Promise((resolve) => setTimeout(resolve, 30))
+firstRunTree = paint(floating)
+const firstRunText = collectText(firstRunTree)
+if (!firstRunText.includes('还没配置 Command Code API key')) throw new Error('no-key popover did not explain the missing key')
+if (!firstRunText.includes('设置 → Command Code')) throw new Error('no-key popover does not point at Settings')
+const firstRunInput = findNodes(firstRunTree, (node) => node.tag === 'input' && node.props && node.props.className === 'dcq-input')[0]
+if (!firstRunInput) throw new Error('no-key popover has no key field')
+
+// Fill the field in the popover and save: the POST must happen, and the report
+// must load afterwards, so the first-run flow really is self-service.
+firstRunInput.props.onChange({ target: { value: 'test_key_1234567890' } })
+await new Promise((resolve) => setTimeout(resolve, 40))
+const filledTree = paint(floating)
+const saveKeyButton = findNodes(
+  filledTree,
+  (node) => node.tag === 'button' && node.props && String(node.props.className || '').includes('dcq-btn-primary'),
+)[0]
+if (!saveKeyButton) throw new Error('no-key popover has no save button')
+reportMode = 'report'
+saveKeyButton.props.onClick()
+await new Promise((resolve) => setTimeout(resolve, 80))
+const savedTree = paint(floating)
+const savedText = collectText(savedTree)
+if (!savedText.includes('套餐额度')) throw new Error('saving the key from the popover did not load the report')
+if (!requests.some((entry) => entry.method === 'POST' && entry.url.includes('/api/key'))) {
+  throw new Error('the popover save did not POST to /api/key')
+}
+const savedCapsule = findNodes(savedTree, (node) => node.props && node.props.className === 'dcq-float')[0]
+savedCapsule.props.onPointerDown(clickEvent)
+savedCapsule.props.onPointerUp(clickEvent)
+await new Promise((resolve) => setTimeout(resolve, 30))
 
 // Settings page: mount, let the effects' fetches settle, repaint.
 paint(settings)

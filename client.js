@@ -133,6 +133,9 @@ window.__ModuleLoader__.load({
       autoRefresh: '本页每分钟自动刷新',
       periodRange: '本期',
       creditsUnit: 'credits',
+      keyPromptTitle: '还没配置 Command Code API key',
+      keyPromptHint: '粘贴一个 Command Code API key，保存后立即开始取数；key 只存进 DSH 凭据库。',
+      keyPromptWhere: '也可以到 设置 → Command Code 里填写或更换。',
     }
     const en = {
       button: 'Command Code',
@@ -206,6 +209,9 @@ window.__ModuleLoader__.load({
       autoRefresh: 'This page refreshes every minute',
       periodRange: 'Cycle',
       creditsUnit: 'credits',
+      keyPromptTitle: 'No Command Code API key yet',
+      keyPromptHint: 'Paste a Command Code API key — saving starts the fetch right away. The key stays in the DSH credential store.',
+      keyPromptWhere: 'You can also fill it in under Settings → Command Code.',
       starTitle: 'Enjoying this plugin?',
       starBody: 'It is open source on GitHub — a star helps a lot.',
       starCta: 'Star on GitHub',
@@ -246,6 +252,8 @@ window.__ModuleLoader__.load({
       .dcq-btn:disabled{opacity:.5;cursor:default}
       .dcq-input{flex:1;min-width:0;padding:7px 10px;border:1px solid var(--dsw-alias-border-l2);border-radius:8px;background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);font:inherit;font-size:12.5px}
       .dcq-input:focus{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:-1px}
+      .dcq-keyprompt{padding:10px 11px;border:1px solid var(--dsw-alias-border-l1);border-radius:10px;background:var(--dsw-alias-bg-layer-1)}
+      .dcq-keyprompt-title{font-weight:700;font-size:12.5px;margin-bottom:4px}
       .dcq-keyline{display:flex;gap:8px;align-items:center;margin-top:8px}
       .dcq-state{padding:30px 16px;text-align:center;font-size:12.5px;color:var(--dsw-alias-label-secondary);line-height:1.6}
       .dcq-err{color:var(--dsw-alias-state-error-primary)}
@@ -715,6 +723,56 @@ window.__ModuleLoader__.load({
           ),
           h('span', { style: { color: data.exceeded ? 'var(--dsw-alias-state-error-primary)' : 'inherit' } }, `${Math.round(percent)}%`),
         ),
+      )
+    }
+
+    // First-run prompt inside the popover. The old no-key state reused the
+    // settings copy ("enter one below") but the popover had no field below it,
+    // so a new user had no idea where to paste the key. The field lives here
+    // now, with the settings page as the alternative.
+    function KeyPrompt({ tr }) {
+      useStore()
+      const [draft, setDraft] = React.useState('')
+      const message = store.keyMessage
+      return h(
+        'div',
+        { className: 'dcq-keyprompt' },
+        h('div', { className: 'dcq-keyprompt-title' }, tr('keyPromptTitle')),
+        h('div', { className: 'dcq-note' }, tr('keyPromptHint')),
+        h(
+          'div',
+          { className: 'dcq-keyline' },
+          h('input', {
+            className: 'dcq-input',
+            type: 'password',
+            autoComplete: 'off',
+            spellCheck: false,
+            placeholder: tr('apiKeyPlaceholder'),
+            value: draft,
+            onChange: (event) => setDraft(event.target.value),
+            onKeyDown: (event) => {
+              if (event.key === 'Enter' && draft.trim()) saveKey(draft.trim()).then(() => setDraft(''))
+            },
+          }),
+          h(
+            'button',
+            {
+              className: 'dcq-btn dcq-btn-primary',
+              type: 'button',
+              disabled: !draft.trim(),
+              onClick: () => saveKey(draft.trim()).then(() => setDraft('')),
+            },
+            tr('apiKeySave'),
+          ),
+        ),
+        message
+          ? h(
+              'div',
+              { className: 'dcq-note', style: { marginTop: 6 }, 'data-error': message.startsWith('error:') ? '1' : '0' },
+              message === 'saved' ? tr('apiKeySaved') : `${tr('error')}: ${message.slice(6)}`,
+            )
+          : null,
+        h('div', { className: 'dcq-note', style: { marginTop: 8 } }, tr('keyPromptWhere')),
       )
     }
 
@@ -1345,9 +1403,11 @@ window.__ModuleLoader__.load({
                 ),
                 !report && store.loading
                   ? h('div', { className: 'dcq-state' }, h('div', { className: 'dcq-spin' }), tr('loading'))
-                  : !report && store.error
-                    ? h(ErrorState, { tr, error: store.error, onRetry: () => loadReport(true) })
-                    : h(ReportCards, { tr, compact: true }),
+                  : !report && store.error === 'NO_KEY'
+                    ? h(KeyPrompt, { tr })
+                    : !report && store.error
+                      ? h(ErrorState, { tr, error: store.error, onRetry: () => loadReport(true) })
+                      : h(ReportCards, { tr, compact: true }),
                 h(
                   'div',
                   { className: 'dcq-pop-foot' },
