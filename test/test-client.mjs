@@ -288,6 +288,16 @@ if (!findNodes(settingsTree, (node) => node.props && node.props.className === 'd
   throw new Error('elapsed band not rendered')
 }
 
+// Ahead of the clock: the fill takes the softer warn tone and the tick turns
+// red, so "spending faster than time" is visible without reading numbers.
+sampleReport.credits.percent = 80
+const hotTree = paint(settings)
+const hotFill = findNodes(hotTree, (node) => node.props && node.props.className === 'dcq-bar-fill' && node.props['data-tone'] === 'warn')[0]
+if (!hotFill) throw new Error('an 80% fill did not switch to the warn tone')
+const hotTick = findNodes(hotTree, (node) => node.props && node.props.className === 'dcq-bar-time' && node.props['data-ahead'] === '1')[0]
+if (!hotTick) throw new Error('a fill ahead of the tick did not turn the tick red')
+sampleReport.credits.percent = 2.6
+
 const starButton = findNodes(settingsTree, (node) => node.props && node.props.className === 'dcq-star-btn')[0]
 if (!starButton) throw new Error('star card button not found')
 if (starButton.props.href !== 'https://github.com/miko-cn/dsh-commandcode-quota') throw new Error(`star card links to ${starButton.props.href}`)

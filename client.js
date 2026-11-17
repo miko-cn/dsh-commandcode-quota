@@ -241,6 +241,8 @@ window.__ModuleLoader__.load({
       .dcq-bar-time{position:absolute;z-index:2;top:-3px;bottom:-3px;width:3px;margin-left:-1.5px;border-radius:2px;
         background:var(--dsw-alias-state-business-primary);
         box-shadow:0 0 6px color-mix(in srgb, var(--dsw-alias-state-business-primary) 50%, transparent);pointer-events:none}
+      .dcq-bar-time[data-ahead="1"]{background:var(--dsw-alias-state-error-primary);
+        box-shadow:0 0 6px color-mix(in srgb, var(--dsw-alias-state-error-primary) 50%, transparent)}
       .dcq-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
       .dcq-grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
       .dcq-stat{border:1px solid var(--dsw-alias-border-l1);border-radius:10px;padding:10px 6px;text-align:center;background:var(--dsw-alias-bg-layer-1)}
@@ -349,6 +351,7 @@ window.__ModuleLoader__.load({
       .dcq-float-track{position:relative;flex:1;height:7px;border-radius:999px;background:color-mix(in srgb, var(--dsw-alias-bg-base) 55%, transparent);overflow:visible;box-shadow:inset 0 1px 1px rgba(0,0,0,.2)}
       .dcq-float-time{position:absolute;z-index:2;top:-2px;bottom:-2px;width:2px;margin-left:-1px;border-radius:1px;
         background:var(--dsw-alias-state-business-primary);pointer-events:none}
+      .dcq-float-time[data-ahead="1"]{background:var(--dsw-alias-state-error-primary)}
       .dcq-float-track.dcq-skel{position:relative;overflow:hidden;background:var(--dsw-alias-bg-layer-2)}
       .dcq-float-track.dcq-skel::after{content:"";position:absolute;inset:0;transform:translateX(-100%);
         background:linear-gradient(90deg, transparent, rgba(255,255,255,.24), transparent);animation:dcq-shimmer 1.2s ease-in-out infinite}
@@ -667,20 +670,45 @@ window.__ModuleLoader__.load({
       })
     }
 
+    /** Worst-of tone for a gauge, shared by fills and the big number. */
+    function toneName(percent) {
+      if (typeof percent !== 'number' || !Number.isFinite(percent)) return 'ok'
+      if (percent >= DANGER_PERCENT) return 'danger'
+      if (percent >= WARN_PERCENT) return 'warn'
+      return 'ok'
+    }
+
+    /** Fill colour: warn is mixed into the track so it stays a muted amber. */
+    function fillColor(percent) {
+      if (toneName(percent) === 'warn') {
+        return 'color-mix(in srgb, var(--dsw-alias-state-warn-primary) 58%, var(--dsw-alias-bg-layer-2))'
+      }
+      return toneVar(percent)
+    }
+
     // One bar carries two facts: the fill is usage, the tick is how much of the
     // cycle has already elapsed. Fill right of the tick = burning faster than
-    // the clock; left of it = idling. Keeps the layout to a single bar.
+    // the clock, and the tick turns red to say so.
     function Bar({ percent, height, timePercent, timeTitle }) {
       const time = typeof timePercent === 'number' && Number.isFinite(timePercent) ? Math.min(100, Math.max(0, timePercent)) : null
+      const ahead = time !== null && typeof percent === 'number' && percent - time > 1
       return h(
         'div',
         { className: 'dcq-bar', style: height ? { height } : undefined, title: time === null ? undefined : timeTitle },
         time === null ? null : h('div', { className: 'dcq-bar-elapsed', style: { width: `${time}%` } }),
         h('div', {
           className: 'dcq-bar-fill',
-          style: { width: `${Math.max(2, Math.min(100, percent || 0))}%`, background: toneVar(percent) },
+          'data-tone': toneName(percent),
+          style: { width: `${Math.max(2, Math.min(100, percent || 0))}%`, background: fillColor(percent) },
         }),
-        time === null ? null : h('span', { className: 'dcq-bar-time', style: { left: `${time}%` }, 'aria-hidden': 'true' }),
+        time === null
+          ? null
+          : h('span', {
+              className: 'dcq-bar-time',
+              'data-ahead': ahead ? '1' : '0',
+              style: { left: `${time}%` },
+              'aria-hidden': 'true',
+            }),
       )
     }
 
@@ -1363,8 +1391,8 @@ window.__ModuleLoader__.load({
                   h(
                     'span',
                     { className: 'dcq-float-track' },
-                    h('span', { className: 'dcq-float-fill', style: { width: `${Math.max(3, Math.min(100, five.percent || 0))}%`, background: toneVar(five.percent) } }),
-                    fiveTime === null ? null : h('span', { className: 'dcq-float-time', style: { left: `${fiveTime}%` } }),
+                    h('span', { className: 'dcq-float-fill', 'data-tone': toneName(five.percent), style: { width: `${Math.max(3, Math.min(100, five.percent || 0))}%`, background: fillColor(five.percent) } }),
+                    fiveTime === null ? null : h('span', { className: 'dcq-float-time', 'data-ahead': (five.percent || 0) - fiveTime > 1 ? '1' : '0', style: { left: `${fiveTime}%` } }),
                   ),
                   h('span', { className: 'dcq-float-pct' }, `${Math.round(five.percent || 0)}%`),
                 )
@@ -1377,8 +1405,8 @@ window.__ModuleLoader__.load({
                   h(
                     'span',
                     { className: 'dcq-float-track' },
-                    h('span', { className: 'dcq-float-fill', style: { width: `${Math.max(3, Math.min(100, week.percent || 0))}%`, background: toneVar(week.percent) } }),
-                    weekTime === null ? null : h('span', { className: 'dcq-float-time', style: { left: `${weekTime}%` } }),
+                    h('span', { className: 'dcq-float-fill', 'data-tone': toneName(week.percent), style: { width: `${Math.max(3, Math.min(100, week.percent || 0))}%`, background: fillColor(week.percent) } }),
+                    weekTime === null ? null : h('span', { className: 'dcq-float-time', 'data-ahead': (week.percent || 0) - weekTime > 1 ? '1' : '0', style: { left: `${weekTime}%` } }),
                   ),
                   h('span', { className: 'dcq-float-pct' }, `${Math.round(week.percent || 0)}%`),
                 )

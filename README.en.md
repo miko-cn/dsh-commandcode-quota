@@ -93,7 +93,7 @@ Besides the monthly pool, Command Code paces you with two rolling limits: how mu
 
 The two bars in the capsule are exactly these windows, with a live countdown on the right:
 
-- the **blue tick** on a bar is how much of that window has already elapsed: fill right of the tick means you are burning faster than the clock
+- the **blue tick** on a bar is how much of that window has already elapsed: fill right of the tick means you are burning faster than the clock, and the tick turns red
 - 5-hour window: `3h 12m 45s` (the seconds tick — that is the countdown, not a data refresh)
 - weekly window: `2d 3h 12m`
 
