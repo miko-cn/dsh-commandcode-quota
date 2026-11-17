@@ -31,6 +31,8 @@ const P = {
   teal: '#12b886',
   tealDark: '#0d9488',
   green: '#3ddc97',
+  blue: '#4176e6',
+  red: '#dc2626',
   track: '#39423e',
 }
 const FONT = 'Segoe UI, Microsoft YaHei UI, Microsoft YaHei, PingFang SC, sans-serif'
@@ -53,9 +55,21 @@ const countdownText = ({ x, y, size, fill = P.dim, prefix, parts, suffix = '' })
 const rect = ({ x, y, w, h, r = 0, fill = 'none', stroke = 'none', sw = 1, opacity = 1 }) =>
   `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" opacity="${opacity}"/>`
 
-const bar = ({ x, y, w, h = 8, pct = 0, color = P.teal }) => {
-  const fill = Math.max(3, Math.round((w * Math.min(100, Math.max(0, pct))) / 100))
-  return rect({ x, y, w, h, r: h / 2, fill: P.track }) + rect({ x, y, w: fill, h, r: h / 2, fill: color })
+// Usage fill plus the elapsed-time tick: the fill is credits used, the band and
+// tick are how much of the cycle has already gone by.
+const bar = ({ x, y, w, h = 8, pct = 0, color = P.teal, time = null, ahead = false }) => {
+  const clamp = (value) => Math.min(100, Math.max(0, value))
+  const fill = Math.max(3, Math.round((w * clamp(pct)) / 100))
+  let svg = rect({ x, y, w, h, r: h / 2, fill: P.track })
+  if (time !== null) {
+    svg += rect({ x, y, w: Math.max(2, Math.round((w * clamp(time)) / 100)), h, r: h / 2, fill: 'rgba(255,255,255,0.12)' })
+  }
+  svg += rect({ x, y, w: fill, h, r: h / 2, fill: color })
+  if (time !== null) {
+    const tx = Math.round((w * clamp(time)) / 100)
+    svg += rect({ x: x + tx - 1.5, y: y - 3, w: 3, h: h + 6, r: 1.5, fill: ahead ? P.red : P.blue })
+  }
+  return svg
 }
 
 let clipId = 0
@@ -147,8 +161,8 @@ function banner() {
   parts.push(iconBtn(cardX + cardW - 56, cardY + 30, 30, '✕'))
   parts.push(text({ x: cardX + 26, y: cardY + 132, size: 15, weight: 700, fill: P.muted, spacing: 1.5 }, '套餐额度'))
   parts.push(text({ x: cardX + 26, y: cardY + 196, size: 50, weight: 700 }, '67.88'))
-  parts.push(text({ x: cardX + 168, y: cardY + 196, size: 22, fill: P.muted }, '/ 70 剩余'))
-  parts.push(bar({ x: cardX + 26, y: cardY + 216, w: cardW - 52, h: 10, pct: 3 }))
+  parts.push(text({ x: cardX + 168, y: cardY + 196, size: 22, fill: P.muted }, '/ 70 credits'))
+  parts.push(bar({ x: cardX + 26, y: cardY + 216, w: cardW - 52, h: 10, pct: 3, time: 55 }))
   parts.push(text({ x: cardX + 26, y: cardY + 258, size: 17, fill: P.muted }, '5 小时 1.03 / 14 · 每周 2.12 / 35'))
   parts.push(text({ x: cardX + cardW - 26, y: cardY + 258, size: 17, fill: P.teal, anchor: 'end' }, '7% / 6%'))
 
@@ -158,10 +172,10 @@ function banner() {
   parts.push(rect({ x: capX, y: capY, w: capW, h: 84, r: 18, fill: 'rgba(30,38,34,0.55)', stroke: 'rgba(255,255,255,0.14)', sw: 1.5 }))
   parts.push(logo(capX + 12, capY + 12, 42, 10))
   parts.push(text({ x: capX + 66, y: capY + 30, size: 14, weight: 700, fill: P.muted }, '5h'))
-  parts.push(bar({ x: capX + 96, y: capY + 19, w: 150, h: 10, pct: 7 }))
+  parts.push(bar({ x: capX + 96, y: capY + 19, w: 150, h: 10, pct: 7, time: 35 }))
   parts.push(text({ x: capX + 254, y: capY + 30, size: 14, fill: P.muted }, '7%'))
   parts.push(text({ x: capX + 66, y: capY + 60, size: 14, weight: 700, fill: P.muted }, 'W'))
-  parts.push(bar({ x: capX + 96, y: capY + 49, w: 150, h: 10, pct: 6 }))
+  parts.push(bar({ x: capX + 96, y: capY + 49, w: 150, h: 10, pct: 6, time: 70 }))
   parts.push(text({ x: capX + 254, y: capY + 60, size: 14, fill: P.muted }, '6%'))
   parts.push(`<circle cx="${capX + 300}" cy="${capY + 42}" r="4" fill="${P.teal}"/>`)
 
@@ -215,12 +229,11 @@ function popover() {
     parts.push(rect({ x: left, y: t, w: innerW, h: card1.h, r: 26, fill: P.glassCard, stroke: P.hairline, sw: 1.4 }))
     parts.push(text({ x: c, y: t + 58, size: 30, weight: 700, fill: P.muted, spacing: 2 }, '套餐额度'))
     parts.push(text({ x: c, y: t + 128, size: 62, weight: 700 }, '67.88'))
-    parts.push(text({ x: c + 208, y: t + 128, size: 30, fill: P.muted }, '/ 70 剩余'))
-    parts.push(bar({ x: c, y: t + 150, w, h: 18, pct: 3 }))
-    parts.push(text({ x: c, y: t + 208, size: 28, fill: P.muted }, '已用 2.26 / 70'))
+    parts.push(text({ x: c + 208, y: t + 128, size: 30, fill: P.muted }, '/ 70 credits'))
+    parts.push(bar({ x: c, y: t + 150, w, h: 18, pct: 3, time: 55 }))
+    parts.push(text({ x: c, y: t + 208, size: 28, fill: P.muted }, '已用 2.26 / 70 credits'))
     parts.push(text({ x: c + w, y: t + 208, size: 28, fill: P.muted, anchor: 'end' }, '3.2%'))
-    parts.push(text({ x: c, y: t + 246, size: 28, fill: P.dim }, '续费 12/3 · 还剩 21 天 6 小时'))
-    parts.push(text({ x: c + w, y: t + 246, size: 28, fill: P.dim, anchor: 'end' }, '11/3 →'))
+    parts.push(text({ x: c, y: t + 246, size: 28, fill: P.dim }, '本期 11/3 – 12/3 · 还剩 21d 6h'))
   }
 
   // windows card
@@ -232,12 +245,12 @@ function popover() {
     parts.push(text({ x: c, y: t + 58, size: 30, weight: 700, fill: P.muted, spacing: 2 }, '用量窗口'))
     parts.push(text({ x: c, y: t + 104, size: 28, weight: 600 }, '5 小时'))
     parts.push(text({ x: c + w, y: t + 104, size: 26, fill: P.muted, anchor: 'end' }, '1.17 / 14'))
-    parts.push(bar({ x: c, y: t + 118, w, h: 16, pct: 8 }))
+    parts.push(bar({ x: c, y: t + 118, w, h: 16, pct: 8, time: 35 }))
     parts.push(countdownText({ x: c, y: t + 164, size: 24, prefix: '重置 15:55 · 还剩 ', parts: [[3, 'h'], [12, 'm'], [45, 's']] }))
     parts.push(text({ x: c + w, y: t + 164, size: 24, fill: P.muted, anchor: 'end' }, '8%'))
     parts.push(text({ x: c, y: t + 214, size: 28, weight: 600 }, '每周'))
     parts.push(text({ x: c + w, y: t + 214, size: 26, fill: P.muted, anchor: 'end' }, '2.26 / 35'))
-    parts.push(bar({ x: c, y: t + 228, w, h: 16, pct: 7 }))
+    parts.push(bar({ x: c, y: t + 228, w, h: 16, pct: 7, time: 70 }))
     parts.push(countdownText({ x: c, y: t + 274, size: 24, prefix: '重置 11/10 22:57 · 还剩 ', parts: [[2, 'd'], [3, 'h'], [12, 'm']] }))
     parts.push(text({ x: c + w, y: t + 274, size: 24, fill: P.muted, anchor: 'end' }, '7%'))
   }
@@ -276,10 +289,10 @@ function popover() {
   parts.push(rect({ x: cx, y: capY, w: 560, h: 112, r: 48, fill: P.glass, stroke: P.hairlineStrong, sw: 2 }))
   parts.push(logo(cx + 24, capY + 17, 78, 20))
   parts.push(text({ x: cx + 126, y: capY + 42, size: 26, weight: 700, fill: P.muted }, '5h'))
-  parts.push(bar({ x: cx + 172, y: capY + 27, w: 290, h: 18, pct: 8 }))
+  parts.push(bar({ x: cx + 172, y: capY + 27, w: 290, h: 18, pct: 8, time: 35 }))
   parts.push(text({ x: cx + 474, y: capY + 42, size: 24, fill: P.muted }, '8%'))
   parts.push(text({ x: cx + 126, y: capY + 92, size: 26, weight: 700, fill: P.muted }, 'W'))
-  parts.push(bar({ x: cx + 172, y: capY + 77, w: 290, h: 18, pct: 7 }))
+  parts.push(bar({ x: cx + 172, y: capY + 77, w: 290, h: 18, pct: 7, time: 70 }))
   parts.push(text({ x: cx + 474, y: capY + 92, size: 24, fill: P.muted }, '7%'))
   parts.push(`<circle cx="${cx + 532}" cy="${capY + 56}" r="5" fill="${P.teal}"/>`)
 
@@ -320,7 +333,6 @@ function settings() {
   parts.push(text({ x: x + w - 120, y: 125, size: 26, fill: P.dim, anchor: 'end' }, '更新于 刚刚'))
   parts.push(rect({ x: x + w - 100, y: 94, w: 100, h: 46, r: 14, fill: 'none', stroke: P.border, sw: 1.6 }))
   parts.push(text({ x: x + w - 50, y: 125, size: 24, fill: P.text, anchor: 'middle' }, '刷新'))
-  parts.push(text({ x, y: 222, size: 26, fill: P.muted }, '完整数据与设置见 设置 → Command Code'))
 
   // credits
   {
@@ -328,12 +340,11 @@ function settings() {
     parts.push(rect({ x, y: t, w, h: card1.h, r: 26, fill: P.card, stroke: P.border, sw: 1.5 }))
     parts.push(text({ x: c, y: t + 56, size: 30, weight: 700, fill: P.muted, spacing: 2 }, '套餐额度'))
     parts.push(text({ x: c, y: t + 128, size: 60, weight: 700 }, '67.74'))
-    parts.push(text({ x: c + 198, y: t + 128, size: 30, fill: P.muted }, '/ 70 剩余'))
-    parts.push(bar({ x: c, y: t + 150, w: iw, h: 18, pct: 3 }))
-    parts.push(text({ x: c, y: t + 208, size: 26, fill: P.muted }, '已用 2.26 / 70'))
+    parts.push(text({ x: c + 198, y: t + 128, size: 30, fill: P.muted }, '/ 70 credits'))
+    parts.push(bar({ x: c, y: t + 150, w: iw, h: 18, pct: 3, time: 55 }))
+    parts.push(text({ x: c, y: t + 208, size: 26, fill: P.muted }, '已用 2.26 / 70 credits'))
     parts.push(text({ x: c + iw, y: t + 208, size: 26, fill: P.muted, anchor: 'end' }, '3.2%'))
-    parts.push(text({ x: c, y: t + 244, size: 26, fill: P.dim }, '续费 12/3 · 还剩 21 天 6 小时'))
-    parts.push(text({ x: c + iw, y: t + 244, size: 26, fill: P.dim, anchor: 'end' }, '11/3 →'))
+    parts.push(text({ x: c, y: t + 244, size: 26, fill: P.dim }, '本期 11/3 – 12/3 · 还剩 21d 6h'))
   }
 
   // windows
@@ -343,12 +354,12 @@ function settings() {
     parts.push(text({ x: c, y: t + 56, size: 30, weight: 700, fill: P.muted, spacing: 2 }, '用量窗口'))
     parts.push(text({ x: c, y: t + 104, size: 28, weight: 600 }, '5 小时'))
     parts.push(text({ x: c + iw, y: t + 104, size: 26, fill: P.muted, anchor: 'end' }, '1.17 / 14'))
-    parts.push(bar({ x: c, y: t + 118, w: iw, h: 16, pct: 8 }))
+    parts.push(bar({ x: c, y: t + 118, w: iw, h: 16, pct: 8, time: 35 }))
     parts.push(countdownText({ x: c, y: t + 164, size: 24, prefix: '重置 15:55 · 还剩 ', parts: [[3, 'h'], [12, 'm'], [45, 's']] }))
     parts.push(text({ x: c + iw, y: t + 164, size: 24, fill: P.muted, anchor: 'end' }, '8%'))
     parts.push(text({ x: c, y: t + 222, size: 28, weight: 600 }, '每周'))
     parts.push(text({ x: c + iw, y: t + 222, size: 26, fill: P.muted, anchor: 'end' }, '2.26 / 35'))
-    parts.push(bar({ x: c, y: t + 236, w: iw, h: 16, pct: 7 }))
+    parts.push(bar({ x: c, y: t + 236, w: iw, h: 16, pct: 7, time: 70 }))
     parts.push(countdownText({ x: c, y: t + 282, size: 24, prefix: '重置 11/10 22:57 · 还剩 ', parts: [[2, 'd'], [3, 'h'], [12, 'm']] }))
     parts.push(text({ x: c + iw, y: t + 282, size: 24, fill: P.muted, anchor: 'end' }, '7%'))
   }
