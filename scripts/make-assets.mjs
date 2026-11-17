@@ -30,10 +30,17 @@ const P = {
   dim: '#6d7873',
   teal: '#12b886',
   tealDark: '#0d9488',
-  green: '#3ddc97',
+  green: '#22c55e',
   blue: '#4176e6',
   red: '#dc2626',
   track: '#39423e',
+  // Real dark-theme token values, so the renders match what ships:
+  // brand-primary/label-primary = neutral-bluish-50, business = deepseek-400,
+  // error = red-400. Usage fills and accents use brand-primary, which is why the
+  // live bars read as white rather than the teal this script used to draw.
+  brand: '#f9fafb',
+  tick: '#7aaaff',
+  tickAhead: '#f25a5a',
 }
 const FONT = 'Segoe UI, Microsoft YaHei UI, Microsoft YaHei, PingFang SC, sans-serif'
 const MONO = 'Cascadia Mono, Consolas, monospace'
@@ -57,7 +64,7 @@ const rect = ({ x, y, w, h, r = 0, fill = 'none', stroke = 'none', sw = 1, opaci
 
 // Usage fill plus the elapsed-time tick: the fill is credits used, the band and
 // tick are how much of the cycle has already gone by.
-const bar = ({ x, y, w, h = 8, pct = 0, color = P.teal, time = null, ahead = false }) => {
+const bar = ({ x, y, w, h = 8, pct = 0, color = P.brand, time = null, ahead = false }) => {
   const clamp = (value) => Math.min(100, Math.max(0, value))
   const fill = Math.max(3, Math.round((w * clamp(pct)) / 100))
   let svg = rect({ x, y, w, h, r: h / 2, fill: P.track })
@@ -67,7 +74,7 @@ const bar = ({ x, y, w, h = 8, pct = 0, color = P.teal, time = null, ahead = fal
   svg += rect({ x, y, w: fill, h, r: h / 2, fill: color })
   if (time !== null) {
     const tx = Math.round((w * clamp(time)) / 100)
-    svg += rect({ x: x + tx - 1.5, y: y - 3, w: 3, h: h + 6, r: 1.5, fill: ahead ? P.red : P.blue })
+    svg += rect({ x: x + tx - 1.5, y: y - 3, w: 3, h: h + 6, r: 1.5, fill: ahead ? P.tickAhead : P.tick })
   }
   return svg
 }
@@ -164,7 +171,7 @@ function banner() {
   parts.push(text({ x: cardX + 168, y: cardY + 196, size: 22, fill: P.muted }, '/ 70 credits'))
   parts.push(bar({ x: cardX + 26, y: cardY + 216, w: cardW - 52, h: 10, pct: 3, time: 55 }))
   parts.push(text({ x: cardX + 26, y: cardY + 258, size: 17, fill: P.muted }, '5 小时 1.03 / 14 · 每周 2.12 / 35'))
-  parts.push(text({ x: cardX + cardW - 26, y: cardY + 258, size: 17, fill: P.teal, anchor: 'end' }, '7% / 6%'))
+  parts.push(text({ x: cardX + cardW - 26, y: cardY + 258, size: 17, fill: P.muted, anchor: 'end' }, '7% / 6%'))
 
   const capW = 320
   const capX = cardX + cardW - capW
@@ -177,7 +184,7 @@ function banner() {
   parts.push(text({ x: capX + 66, y: capY + 60, size: 14, weight: 700, fill: P.muted }, 'W'))
   parts.push(bar({ x: capX + 96, y: capY + 49, w: 150, h: 10, pct: 6, time: 70 }))
   parts.push(text({ x: capX + 254, y: capY + 60, size: 14, fill: P.muted }, '6%'))
-  parts.push(`<circle cx="${capX + 300}" cy="${capY + 42}" r="4" fill="${P.teal}"/>`)
+  parts.push(`<circle cx="${capX + 300}" cy="${capY + 42}" r="4" fill="${P.brand}"/>`)
 
   return canvas({ w, h, body: parts.join('\n') })
 }
@@ -281,7 +288,7 @@ function popover() {
 
   // footer
   parts.push(text({ x: left, y: footerBaseline, size: 24, fill: P.dim }, '更新于 刚刚'))
-  parts.push(text({ x: left + innerW, y: footerBaseline, size: 26, weight: 600, fill: P.teal, anchor: 'end' }, '在 Studio 打开'))
+  parts.push(text({ x: left + innerW, y: footerBaseline, size: 26, weight: 600, fill: P.brand, anchor: 'end' }, '在 Studio 打开'))
 
   // floating capsule, left-aligned with the shell, two stacked rows
   const capY = cy + shellH + 54
@@ -294,7 +301,7 @@ function popover() {
   parts.push(text({ x: cx + 126, y: capY + 92, size: 26, weight: 700, fill: P.muted }, 'W'))
   parts.push(bar({ x: cx + 172, y: capY + 77, w: 290, h: 18, pct: 7, time: 70 }))
   parts.push(text({ x: cx + 474, y: capY + 92, size: 24, fill: P.muted }, '7%'))
-  parts.push(`<circle cx="${cx + 532}" cy="${capY + 56}" r="5" fill="${P.teal}"/>`)
+  parts.push(`<circle cx="${cx + 532}" cy="${capY + 56}" r="5" fill="${P.brand}"/>`)
 
   return canvas({ w: W, h: canvasH, body: parts.join('\n') })
 }
@@ -328,8 +335,8 @@ function settings() {
   parts.push(logo(x, 66, 96, 24))
   parts.push(text({ x: x + 124, y: 126, size: 44, weight: 700 }, 'Command Code'))
   parts.push(text({ x: x + 126, y: 166, size: 28, fill: P.muted }, '@demo'))
-  parts.push(rect({ x: x + 470, y: 94, w: 108, h: 46, r: 23, fill: 'rgba(18,184,134,0.14)', stroke: 'rgba(18,184,134,0.35)', sw: 1.5 }))
-  parts.push(text({ x: x + 524, y: 125, size: 24, weight: 700, fill: P.teal, anchor: 'middle' }, 'GOAT'))
+  parts.push(rect({ x: x + 470, y: 94, w: 108, h: 46, r: 23, fill: '#2c2c2e', stroke: 'rgba(255,255,255,0.14)', sw: 1.5 }))
+  parts.push(text({ x: x + 524, y: 125, size: 24, weight: 700, fill: P.brand, anchor: 'middle' }, 'GOAT'))
   parts.push(text({ x: x + w - 120, y: 125, size: 26, fill: P.dim, anchor: 'end' }, '更新于 刚刚'))
   parts.push(rect({ x: x + w - 100, y: 94, w: 100, h: 46, r: 14, fill: 'none', stroke: P.border, sw: 1.6 }))
   parts.push(text({ x: x + w - 50, y: 125, size: 24, fill: P.text, anchor: 'middle' }, '刷新'))
@@ -408,8 +415,8 @@ function settings() {
     parts.push(text({ x: c, y: t + 100, size: 24, fill: P.dim }, '来源: DSH 凭据库 · 可在此处修改'))
     parts.push(rect({ x: c, y: t + 124, w: iw - 250, h: 56, r: 12, fill: '#1c211f', stroke: P.border, sw: 1.4 }))
     parts.push(text({ x: c + 20, y: t + 160, size: 26, fill: P.muted }, '••••••••••••••••'))
-    parts.push(rect({ x: c + iw - 224, y: t + 124, w: 108, h: 56, r: 12, fill: P.tealDark }))
-    parts.push(text({ x: c + iw - 170, y: t + 160, size: 26, weight: 600, fill: '#ffffff', anchor: 'middle' }, '保存'))
+    parts.push(rect({ x: c + iw - 224, y: t + 124, w: 108, h: 56, r: 12, fill: P.brand }))
+    parts.push(text({ x: c + iw - 170, y: t + 160, size: 26, weight: 600, fill: '#16181a', anchor: 'middle' }, '保存'))
     parts.push(rect({ x: c + iw - 104, y: t + 124, w: 104, h: 56, r: 12, fill: 'none', stroke: P.border, sw: 1.4 }))
     parts.push(text({ x: c + iw - 52, y: t + 160, size: 26, fill: P.text, anchor: 'middle' }, '清除'))
     parts.push(text({ x: c, y: t + 222, size: 22, fill: P.dim }, '密钥只保存在 DSH 的凭据库里，不会写进配置文件，也不会发给浏览器。'))
