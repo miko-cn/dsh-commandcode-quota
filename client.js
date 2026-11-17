@@ -136,6 +136,7 @@ window.__ModuleLoader__.load({
       keyPromptTitle: '还没配置 Command Code API key',
       keyPromptHint: '粘贴一个 Command Code API key，保存后立即开始取数；key 只存进 DSH 凭据库。',
       keyPromptWhere: '也可以到 设置 → Command Code 里填写或更换。',
+      timeProgress: '时间进度',
     }
     const en = {
       button: 'Command Code',
@@ -212,6 +213,7 @@ window.__ModuleLoader__.load({
       keyPromptTitle: 'No Command Code API key yet',
       keyPromptHint: 'Paste a Command Code API key — saving starts the fetch right away. The key stays in the DSH credential store.',
       keyPromptWhere: 'You can also fill it in under Settings → Command Code.',
+      timeProgress: 'time',
       starTitle: 'Enjoying this plugin?',
       starBody: 'It is open source on GitHub — a star helps a lot.',
       starCta: 'Star on GitHub',
@@ -233,8 +235,12 @@ window.__ModuleLoader__.load({
       .dcq-bigline{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}
       .dcq-big{font-size:26px;font-weight:750;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
       .dcq-big-unit{font-size:12px;color:var(--dsw-alias-label-secondary)}
-      .dcq-bar{height:8px;border-radius:999px;background:var(--dsw-alias-bg-layer-2);overflow:hidden;margin:8px 0 6px}
-      .dcq-bar-fill{height:100%;border-radius:999px;transition:width .5s ease}
+      .dcq-bar{height:8px;border-radius:999px;background:var(--dsw-alias-bg-layer-2);overflow:visible;margin:8px 0 6px;position:relative}
+      .dcq-bar-elapsed{position:absolute;top:0;bottom:0;left:0;border-radius:999px 0 0 999px;background:color-mix(in srgb, var(--dsw-alias-label-primary) 12%, transparent);pointer-events:none}
+      .dcq-bar-fill{position:relative;z-index:1;height:100%;border-radius:999px;transition:width .5s ease}
+      .dcq-bar-time{position:absolute;z-index:2;top:-3px;bottom:-3px;width:3px;margin-left:-1.5px;border-radius:2px;
+        background:var(--dsw-alias-state-business-primary);
+        box-shadow:0 0 6px color-mix(in srgb, var(--dsw-alias-state-business-primary) 50%, transparent);pointer-events:none}
       .dcq-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
       .dcq-grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
       .dcq-stat{border:1px solid var(--dsw-alias-border-l1);border-radius:10px;padding:10px 6px;text-align:center;background:var(--dsw-alias-bg-layer-1)}
@@ -340,7 +346,9 @@ window.__ModuleLoader__.load({
       .dcq-float-bars{display:flex;flex-direction:column;gap:6px;min-width:132px}
       .dcq-float-row{display:flex;align-items:center;gap:7px;line-height:1;font-variant-numeric:tabular-nums}
       .dcq-float-tag{width:18px;flex:none;color:var(--dsw-alias-label-secondary);font-size:9.5px;font-weight:700;letter-spacing:.3px;text-align:left}
-      .dcq-float-track{flex:1;height:7px;border-radius:999px;background:color-mix(in srgb, var(--dsw-alias-bg-base) 55%, transparent);overflow:hidden;box-shadow:inset 0 1px 1px rgba(0,0,0,.2)}
+      .dcq-float-track{position:relative;flex:1;height:7px;border-radius:999px;background:color-mix(in srgb, var(--dsw-alias-bg-base) 55%, transparent);overflow:visible;box-shadow:inset 0 1px 1px rgba(0,0,0,.2)}
+      .dcq-float-time{position:absolute;z-index:2;top:-2px;bottom:-2px;width:2px;margin-left:-1px;border-radius:1px;
+        background:var(--dsw-alias-state-business-primary);pointer-events:none}
       .dcq-float-track.dcq-skel{position:relative;overflow:hidden;background:var(--dsw-alias-bg-layer-2)}
       .dcq-float-track.dcq-skel::after{content:"";position:absolute;inset:0;transform:translateX(-100%);
         background:linear-gradient(90deg, transparent, rgba(255,255,255,.24), transparent);animation:dcq-shimmer 1.2s ease-in-out infinite}
@@ -659,14 +667,20 @@ window.__ModuleLoader__.load({
       })
     }
 
-    function Bar({ percent, height }) {
+    // One bar carries two facts: the fill is usage, the tick is how much of the
+    // cycle has already elapsed. Fill right of the tick = burning faster than
+    // the clock; left of it = idling. Keeps the layout to a single bar.
+    function Bar({ percent, height, timePercent, timeTitle }) {
+      const time = typeof timePercent === 'number' && Number.isFinite(timePercent) ? Math.min(100, Math.max(0, timePercent)) : null
       return h(
         'div',
-        { className: 'dcq-bar', style: height ? { height } : undefined },
+        { className: 'dcq-bar', style: height ? { height } : undefined, title: time === null ? undefined : timeTitle },
+        time === null ? null : h('div', { className: 'dcq-bar-elapsed', style: { width: `${time}%` } }),
         h('div', {
           className: 'dcq-bar-fill',
           style: { width: `${Math.max(2, Math.min(100, percent || 0))}%`, background: toneVar(percent) },
         }),
+        time === null ? null : h('span', { className: 'dcq-bar-time', style: { left: `${time}%` }, 'aria-hidden': 'true' }),
       )
     }
 
@@ -698,10 +712,12 @@ window.__ModuleLoader__.load({
       return h(React.Fragment, null, nodes)
     }
 
-    function Meter({ label, data, tr, compactMode, countdownMode }) {
+    function Meter({ label, data, tr, compactMode, countdownMode, windowMs }) {
       const now = useNow(countdownMode === 'hms' ? 1000 : 30000)
       if (!data) return null
       const percent = data.percent || 0
+      const timePercent =
+        data.resetAt && windowMs ? Math.min(100, Math.max(0, ((now - (data.resetAt - windowMs)) / windowMs) * 100)) : null
       return h(
         'div',
         { style: { marginTop: compactMode ? 6 : 10 } },
@@ -711,7 +727,12 @@ window.__ModuleLoader__.load({
           h('span', { style: { fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, label),
           h('span', null, `${credits(data.used)} / ${credits(data.cap)} ${tr('creditsUnit')}`),
         ),
-        h(Bar, { percent, height: compactMode ? 6 : 8 }),
+        h(Bar, {
+          percent,
+          height: compactMode ? 6 : 8,
+          timePercent,
+          timeTitle: timePercent === null ? undefined : `${tr('timeProgress')} ${Math.round(timePercent)}%`,
+        }),
         h(
           'div',
           { className: 'dcq-meta', style: { fontSize: 10.5 } },
@@ -914,6 +935,14 @@ window.__ModuleLoader__.load({
       const credit = report.credits
       const windows = report.windows
       const summary = report.summary
+      const now = Date.now()
+      const periodPercent = (() => {
+        if (!summary || !summary.periodStart || !summary.periodEnd) return null
+        const start = Date.parse(summary.periodStart)
+        const end = Date.parse(summary.periodEnd)
+        if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return null
+        return Math.min(100, Math.max(0, ((now - start) / (end - start)) * 100))
+      })()
       const cards = []
       cards.push(
         h(
@@ -926,7 +955,11 @@ window.__ModuleLoader__.load({
             h('span', { className: 'dcq-big', style: { color: toneVar(credit && credit.percent) } }, credits(credit && credit.remaining)),
             credit && credit.total ? h('span', { className: 'dcq-big-unit' }, `/ ${credits(credit.total)} ${tr('creditsUnit')}`) : null,
           ),
-          h(Bar, { percent: credit && credit.percent }),
+          h(Bar, {
+            percent: credit && credit.percent,
+            timePercent: periodPercent,
+            timeTitle: periodPercent === null ? undefined : `${tr('timeProgress')} ${Math.round(periodPercent)}%`,
+          }),
           h(
             'div',
             { className: 'dcq-meta' },
@@ -965,8 +998,8 @@ window.__ModuleLoader__.load({
             ? h(
                 React.Fragment,
                 null,
-                h(Meter, { label: tr('fiveHour'), data: windows.fiveHour, tr, compactMode: small, countdownMode: 'hms' }),
-                h(Meter, { label: tr('weekly'), data: windows.weekly, tr, compactMode: small, countdownMode: 'dhms' }),
+                h(Meter, { label: tr('fiveHour'), data: windows.fiveHour, tr, compactMode: small, countdownMode: 'hms', windowMs: 5 * 3600000 }),
+                h(Meter, { label: tr('weekly'), data: windows.weekly, tr, compactMode: small, countdownMode: 'dhms', windowMs: 7 * 86400000 }),
               )
             : h('div', { className: 'dcq-note' }, tr('noWindows')),
         ),
@@ -1275,6 +1308,10 @@ window.__ModuleLoader__.load({
       const five = windows && windows.fiveHour
       const week = windows && windows.weekly
       const credit = report && report.credits
+      const timePct = (win, windowMs) =>
+        win && win.resetAt ? Math.min(100, Math.max(0, ((now - (win.resetAt - windowMs)) / windowMs) * 100)) : null
+      const fiveTime = timePct(five, 5 * 3600000)
+      const weekTime = timePct(week, 7 * 86400000)
 
       const popPos = (() => {
         if (!store.popoverOpen || !capsule.current) return null
@@ -1327,6 +1364,7 @@ window.__ModuleLoader__.load({
                     'span',
                     { className: 'dcq-float-track' },
                     h('span', { className: 'dcq-float-fill', style: { width: `${Math.max(3, Math.min(100, five.percent || 0))}%`, background: toneVar(five.percent) } }),
+                    fiveTime === null ? null : h('span', { className: 'dcq-float-time', style: { left: `${fiveTime}%` } }),
                   ),
                   h('span', { className: 'dcq-float-pct' }, `${Math.round(five.percent || 0)}%`),
                 )
@@ -1340,6 +1378,7 @@ window.__ModuleLoader__.load({
                     'span',
                     { className: 'dcq-float-track' },
                     h('span', { className: 'dcq-float-fill', style: { width: `${Math.max(3, Math.min(100, week.percent || 0))}%`, background: toneVar(week.percent) } }),
+                    weekTime === null ? null : h('span', { className: 'dcq-float-time', style: { left: `${weekTime}%` } }),
                   ),
                   h('span', { className: 'dcq-float-pct' }, `${Math.round(week.percent || 0)}%`),
                 )

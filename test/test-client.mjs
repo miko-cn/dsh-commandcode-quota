@@ -276,6 +276,18 @@ console.log('settings text:', settingsText)
 for (const expected of ['套餐额度', 'GOAT', '68.17', '2.3K', '100%', '$1.81', '230.3M', '用量窗口', 'API key', '浮窗', '在 GitHub 上 Star', '自动刷新间隔']) {
   if (!settingsText.includes(expected)) throw new Error(`settings page is missing ${expected}`)
 }
+// The same bar carries usage and cycle time: an elapsed band plus a tick at
+// the elapsed fraction, on the credit bar and both window bars.
+const timeTicks = findNodes(settingsTree, (node) => node.props && node.props.className === 'dcq-bar-time')
+if (timeTicks.length < 3) throw new Error(`expected time ticks on the credit bar and both windows, got ${timeTicks.length}`)
+for (const tick of timeTicks) {
+  const left = parseFloat(String(tick.props.style && tick.props.style.left))
+  if (!(left >= 0 && left <= 100)) throw new Error(`time tick out of range: ${left}`)
+}
+if (!findNodes(settingsTree, (node) => node.props && node.props.className === 'dcq-bar-elapsed').length) {
+  throw new Error('elapsed band not rendered')
+}
+
 const starButton = findNodes(settingsTree, (node) => node.props && node.props.className === 'dcq-star-btn')[0]
 if (!starButton) throw new Error('star card button not found')
 if (starButton.props.href !== 'https://github.com/miko-cn/dsh-commandcode-quota') throw new Error(`star card links to ${starButton.props.href}`)
@@ -303,6 +315,9 @@ console.log('capsule text:', floatText)
 for (const expected of ['5h', 'W', '5%']) {
   if (!floatText.includes(expected)) throw new Error(`capsule is missing ${expected}`)
 }
+// The capsule bars carry the same cycle-time tick as the panel bars.
+const capsuleTicks = findNodes(floatTree, (node) => node.props && node.props.className === 'dcq-float-time')
+if (capsuleTicks.length !== 2) throw new Error(`expected time ticks on both capsule bars, got ${capsuleTicks.length}`)
 
 const capsule = findNodes(floatTree, (node) => node.props && node.props.className === 'dcq-float')[0]
 if (!capsule) throw new Error('capsule element not found')
