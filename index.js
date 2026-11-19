@@ -260,6 +260,20 @@ async function buildReport(ctx, config, overridePlan) {
   const percent = total !== null && used !== null && total > 0 ? Math.min(100, Math.round((used / total) * 1000) / 10) : null
 
   const limits = credits?.windowLimits ?? null
+  // The window object is incomplete for a moment when a window rolls over: the
+  // API can omit `resetAt` or hand it over as an ISO string instead of ms. Keep
+  // whatever it gives us rather than dropping the field, so the countdown does
+  // not vanish and make an empty window look like broken data.
+  const resetAtOf = (value) => {
+    if (typeof value === 'number' && Number.isFinite(value)) return value >= 1e11 ? value : value >= 1e9 ? value * 1000 : null
+    if (typeof value === 'string' && value.trim()) {
+      const numeric = Number(value)
+      if (Number.isFinite(numeric)) return numeric >= 1e11 ? numeric : numeric >= 1e9 ? numeric * 1000 : null
+      const parsed = Date.parse(value)
+      return Number.isFinite(parsed) ? parsed : null
+    }
+    return null
+  }
   const windowOf = (entry, fallbackCap) => {
     if (!entry) return null
     const cap = typeof entry.cap === 'number' ? entry.cap : fallbackCap || 0
@@ -267,7 +281,7 @@ async function buildReport(ctx, config, overridePlan) {
       used: round(entry.used),
       cap,
       exceeded: entry.exceeded === true,
-      resetAt: typeof entry.resetAt === 'number' ? entry.resetAt : null,
+      resetAt: resetAtOf(entry.resetAt),
       percent: cap > 0 ? Math.min(100, Math.round(((entry.used ?? 0) / cap) * 1000) / 10) : 0,
     }
   }

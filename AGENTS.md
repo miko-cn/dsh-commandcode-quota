@@ -40,7 +40,7 @@
 4. **不引入构建步骤**：源码即产物，`node --check` 通过就应该能跑。
 5. **客户端 service 必须写进 `inject`**：`slots`、`locale` 等用到就要声明。直接读未声明的 `ctx.<service>` 会抛 `cannot get property "..." without inject`，导致 Desktop 启动时报 `web boot: entry did not activate`（**且不带原因**）。
 6. **`apply` 每一步单独 try/catch**：失败时在页面留可见错误（`bootFailure` 红框），不要让整个入口挂掉。
-7. **主题与国际化**：容器只用 `--dsw-alias-*` token；可见文案走 locale（`zh` / `en`），改文案后跑 `node scripts/check-locales.mjs`。
+7. **主题与国际化**：容器只用 `--dsw-alias-*` token；可见文案走 locale（`zh` / `en`），改文案后跑 `node scripts/check-locales.mjs`。`scripts/make-assets.mjs` 渲染素材也必须用这些 token 的真实色值——深色主题下进度条是近白的 `brand-primary`，不要自定强调色（曾经用过 teal 绿，与真机不符被发现）。
 8. **不碰官方**：不改、不包、不冒用 `@deepseek-ai/*`；安装期不执行任何脚本。
 9. **隐私**：不提交真实账号截图、邮箱、本机绝对路径或任何 key；测试与素材用 demo 数据（`@demo` / `Demo User`）。
 10. **只做最小改动**：额度到阈值就只是进度条和浮窗变色，不要顺手加预测撞线、本地历史、预警弹窗这类机制——复杂版已被回退过一次；要加复杂度先问。
@@ -108,6 +108,7 @@ $env:SHARP_PATH='<node_modules>/sharp'; node scripts/make-assets.mjs
 4. 临时诊断：`apply` 每步 try/catch + 页面红框（`bootFailure`），重启后可以直接复制错误。
 
 **路由状态判断**：`401` = 插件已加载且门禁生效；`404` = 插件没加载（或路由没注册）。
+**`npm publish` 返回 404 Not Found**：几乎总是本机登录态失效，不是权限或包名问题。先跑 `npm whoami`，输出 `yumiku` 才算有效；否则 `npm login`（浏览器 2FA）后重试。日志里 `PUT 401 → 网页认证 → PUT 202` 是正常流程，等 registry 生效（轮询 `npm view ... version`）再继续。
 
 **`plugin_manager` 安装报 `ERR_PNPM_EPERM`**
 多为 profile `node_modules` 里残留的 junction。用 `cmd /c rmdir <link>` 只删链接（**不要** `Remove-Item -Recurse`，Windows PowerShell 可能跟随 junction 删到目标目录——本仓库 `.git` 就这样被误删过一次）。清理后重新安装。

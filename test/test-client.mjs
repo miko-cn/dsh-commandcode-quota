@@ -288,6 +288,17 @@ if (!findNodes(settingsTree, (node) => node.props && node.props.className === 'd
   throw new Error('elapsed band not rendered')
 }
 
+// A window right after a rollover can arrive without `resetAt`. The row must
+// keep its reset line (a dash) instead of collapsing, so an empty window does
+// not look like missing data.
+const savedResetAt = sampleReport.windows.fiveHour.resetAt
+sampleReport.windows.fiveHour.resetAt = null
+const rolledTree = paint(settings)
+const rolledText = collectText(rolledTree)
+if (!rolledText.includes('重置 —')) throw new Error('a window without resetAt dropped its reset line instead of showing a dash')
+if (!rolledText.includes('0.75 / 14')) throw new Error('a window without resetAt lost its usage numbers')
+sampleReport.windows.fiveHour.resetAt = savedResetAt
+
 // Ahead of the clock: the fill takes the softer warn tone and the tick turns
 // red, so "spending faster than time" is visible without reading numbers.
 sampleReport.credits.percent = 80

@@ -767,7 +767,10 @@ window.__ModuleLoader__.load({
           h(
             'span',
             null,
-            data.resetAt ? `${tr('windowReset')} ${clock(data.resetAt)} · ` : '',
+            // A window that just rolled over can arrive without `resetAt`. Show
+            // the label with a dash instead of dropping the whole line, which
+            // reads as "this window has no data".
+            data.resetAt ? `${tr('windowReset')} ${clock(data.resetAt)} · ` : `${tr('windowReset')} —`,
             data.resetAt ? h(Countdown, { ms: data.resetAt, tr, mode: countdownMode, now }) : '',
           ),
           h('span', { style: { color: data.exceeded ? 'var(--dsw-alias-state-error-primary)' : 'inherit' } }, `${Math.round(percent)}%`),
