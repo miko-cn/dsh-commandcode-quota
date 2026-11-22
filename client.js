@@ -45,6 +45,9 @@ window.__ModuleLoader__.load({
     const POS_KEY = 'dcq.capsule.position'
     const HIDDEN_KEY = 'dcq.capsule.hidden'
     const MINI_KEY = 'dcq.capsule.mini'
+    // The popover's mini-capsule tip is a one-time pointer: dismissing it is
+    // permanent, so a user who already knows about mini mode stops seeing it.
+    const TIP_KEY = 'dcq.miniTip.dismissed'
     const PLAN_KEY = 'dcq.plan.override'
     // Background refresh of the floating capsule. Minutes, clamped so the
     // upstream 4-request round is never hammered harder than once a minute.
@@ -272,6 +275,10 @@ window.__ModuleLoader__.load({
         border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);
         font-size:11px;line-height:1.45;color:var(--dsw-alias-label-secondary)}
       .dcq-tip b{color:var(--dsw-alias-label-primary);font-weight:700}
+      .dcq-tip-text{flex:1;min-width:0}
+      .dcq-tip-close{width:18px;height:18px;flex:none;margin:-2px -3px -2px 0;border:0;border-radius:6px;padding:0;
+        background:transparent;color:var(--dsw-alias-label-secondary);cursor:pointer;display:grid;place-items:center;font:inherit;font-size:11px;line-height:1}
+      .dcq-tip-close:hover{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}
       .dcq-note{font-size:11.5px;color:var(--dsw-alias-label-secondary);line-height:1.55}
       .dcq-link{color:var(--dsw-alias-brand-primary);text-decoration:none;font-weight:600;font-size:12px}
       .dcq-link:hover{text-decoration:underline}
@@ -492,6 +499,7 @@ window.__ModuleLoader__.load({
 
     store.widgetHidden = readLocal(HIDDEN_KEY) === true
     store.miniCapsule = readLocal(MINI_KEY) === true
+    store.miniTipDismissed = readLocal(TIP_KEY) === true
     store.position = readLocal(POS_KEY)
     store.planOverride = readLocal(PLAN_KEY) || ''
     store.refreshMs = clampRefresh(readLocal(REFRESH_KEY) ?? REFRESH_DEFAULT)
@@ -1602,16 +1610,29 @@ window.__ModuleLoader__.load({
                     : !report && store.error
                       ? h(ErrorState, { tr, error: store.error, onRetry: () => loadReport(true) })
                       : h(ReportCards, { tr, compact: true }),
-                // One-line pointer to the mini capsule. It disappears on its own
-                // once the user switches mini on, so it never becomes permanent
-                // furniture and needs no dismissed-state flag.
-                store.miniCapsule
+                // One-line pointer to the mini capsule. It retires itself once
+                // mini mode is on, and the user can dismiss it for good.
+                store.miniCapsule || store.miniTipDismissed
                   ? null
                   : h(
                       'div',
                       { className: 'dcq-tip' },
                       h('span', { className: 'dcq-new' }, tr('badgeNew')),
-                      h('span', null, tr('miniTip')),
+                      h('span', { className: 'dcq-tip-text' }, tr('miniTip')),
+                      h(
+                        'button',
+                        {
+                          type: 'button',
+                          className: 'dcq-tip-close',
+                          title: tr('close'),
+                          'aria-label': tr('close'),
+                          onClick: () => {
+                            store.set({ miniTipDismissed: true })
+                            writeLocal(TIP_KEY, true)
+                          },
+                        },
+                        '✕',
+                      ),
                     ),
                 h(
                   'div',

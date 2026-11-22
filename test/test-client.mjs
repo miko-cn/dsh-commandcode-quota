@@ -452,6 +452,15 @@ await new Promise((resolve) => setTimeout(resolve, 30))
 if (collectText(paint(floating)).includes('迷你胶囊')) throw new Error('mini-capsule tip should disappear once mini mode is on')
 tipToggle.props.onClick()
 await new Promise((resolve) => setTimeout(resolve, 30))
+// The tip can also be dismissed for good: the close button hides it and the
+// choice is persisted, so it does not return after a reload.
+const tipClose = findNodes(paint(floating), (node) => node.props && node.props.className === 'dcq-tip-close')[0]
+if (!tipClose) throw new Error('mini-capsule tip has no dismiss button')
+if (tipClose.props['aria-label'] !== '关闭') throw new Error(`tip dismiss should be labelled 关闭, got ${tipClose.props['aria-label']}`)
+tipClose.props.onClick()
+await new Promise((resolve) => setTimeout(resolve, 30))
+if (collectText(paint(floating)).includes('迷你胶囊')) throw new Error('dismissed mini-capsule tip still renders')
+if (storage.get('dcq.miniTip.dismissed') !== 'true') throw new Error('tip dismissal was not persisted')
 const backdrop = findNodes(popTree, (node) => node.props && node.props.style && node.props.style.zIndex === 2147482999)[0]
 if (!backdrop) throw new Error('popover backdrop is missing its top-layer z-index')
 
