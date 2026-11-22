@@ -377,6 +377,13 @@ if (String(created[0].textContent || '').includes('dcq-float-mini')) {
 }
 const miniCss = created[0].textContent || ''
 if (!miniCss.includes('[data-mini="1"]')) throw new Error('compact capsule styles are missing')
+// Both ends of both rows stay fully rounded, including a 1-3% fill.
+if (!miniCss.includes('[data-mini="1"] .dcq-float-fill{border-radius:999px')) {
+  throw new Error('compact capsule fills lost their rounded caps')
+}
+if (!miniCss.includes('[data-mini="1"] .dcq-float-track{') || !miniCss.includes('border-radius:999px')) {
+  throw new Error('compact capsule track lost its rounded caps')
+}
 miniToggle.props.onClick()
 await new Promise((resolve) => setTimeout(resolve, 30))
 if (findNodes(paint(floating), (node) => node.props && node.props['data-mini'] === '1').length) {

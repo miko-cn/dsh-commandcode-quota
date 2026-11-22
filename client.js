@@ -361,8 +361,12 @@ window.__ModuleLoader__.load({
          window bars, a little shorter and narrower. */
       .dcq-float[data-mini="1"]{padding:7px 9px;border-radius:15.5px;gap:0}
       .dcq-float[data-mini="1"] .dcq-float-bars{min-width:0;gap:5px}
-      .dcq-float[data-mini="1"] .dcq-float-track{flex:none;width:90px;height:5px}
-      .dcq-float[data-mini="1"] .dcq-float-time{top:-1px;bottom:-1px}
+      /* Round caps on both ends of both rows. The floor keeps a 1-3% fill from
+         collapsing into a square sliver: at 5px tall the cap needs ~6px. */
+      .dcq-float[data-mini="1"] .dcq-float-track{flex:none;width:62px;height:5px;border-radius:999px}
+      .dcq-float[data-mini="1"] .dcq-float-fill{border-radius:999px;min-width:6px}
+      /* The elapsed-time tick stays a thin line with its own 1.5px rounding. */
+      .dcq-float[data-mini="1"] .dcq-float-time{top:-1px;bottom:-1px;width:3px;margin-left:-1.5px;border-radius:1.5px}
       .dcq-float-track.dcq-skel{position:relative;overflow:hidden;background:var(--dsw-alias-bg-layer-2)}
       .dcq-float-track.dcq-skel::after{content:"";position:absolute;inset:0;transform:translateX(-100%);
         background:linear-gradient(90deg, transparent, rgba(255,255,255,.24), transparent);animation:dcq-shimmer 1.2s ease-in-out infinite}
