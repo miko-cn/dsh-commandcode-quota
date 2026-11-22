@@ -44,6 +44,10 @@ window.__ModuleLoader__.load({
     const STYLE_ID = 'dcq-style'
     const POS_KEY = 'dcq.capsule.position'
     const HIDDEN_KEY = 'dcq.capsule.hidden'
+    const MINI_KEY = 'dcq.capsule.mini'
+    // In compact mode the single bar rotates through the three gauges; four
+    // seconds is slow enough to read and fast enough to notice the rotation.
+    const MINI_CYCLE_MS = 4000
     const PLAN_KEY = 'dcq.plan.override'
     // Background refresh of the floating capsule. Minutes, clamped so the
     // upstream 4-request round is never hammered harder than once a minute.
@@ -125,6 +129,8 @@ window.__ModuleLoader__.load({
       widgetRefresh: '自动刷新间隔',
       refreshUnit: '分钟',
       refreshHint: '浮窗后台多久拉一次数据，改完立即生效',
+      widgetMini: '紧凑胶囊',
+      widgetMiniHint: '不显示图标，只留一行进度条，循环显示 5 小时 / 每周 / 套餐额度',
       collapsed: '收起',
       expand: '展开',
       starTitle: '喜欢这个插件？',
@@ -205,6 +211,8 @@ window.__ModuleLoader__.load({
       widgetRefresh: 'Refresh interval',
       refreshUnit: 'min',
       refreshHint: 'How often the widget fetches in the background; applies immediately',
+      widgetMini: 'Compact capsule',
+      widgetMiniHint: 'No icon: one bar that cycles through the 5-hour, weekly and credit usage',
       collapsed: 'Collapse',
       expand: 'Expand',
       autoRefresh: 'This page refreshes every minute',
@@ -352,15 +360,22 @@ window.__ModuleLoader__.load({
       .dcq-float-time{position:absolute;z-index:2;top:-2px;bottom:-2px;width:2px;margin-left:-1px;border-radius:1px;
         background:var(--dsw-alias-state-business-primary);pointer-events:none}
       .dcq-float-time[data-ahead="1"]{background:var(--dsw-alias-state-error-primary)}
+      /* Compact capsule: no icon, one row, a little shorter and narrower. */
+      .dcq-float[data-mini="1"]{padding:6px 10px 6px 11px;border-radius:12px;gap:8px}
+      .dcq-float[data-mini="1"] .dcq-float-bars{min-width:0;gap:0}
+      .dcq-float[data-mini="1"] .dcq-float-row{gap:5px}
+      .dcq-float[data-mini="1"] .dcq-float-tag{width:14px;font-size:9px}
+      .dcq-float[data-mini="1"] .dcq-float-track{flex:none;width:76px;height:6px}
+      .dcq-float[data-mini="1"] .dcq-float-pct{min-width:24px;font-size:9.5px}
       .dcq-float-track.dcq-skel{position:relative;overflow:hidden;background:var(--dsw-alias-bg-layer-2)}
       .dcq-float-track.dcq-skel::after{content:"";position:absolute;inset:0;transform:translateX(-100%);
         background:linear-gradient(90deg, transparent, rgba(255,255,255,.24), transparent);animation:dcq-shimmer 1.2s ease-in-out infinite}
       @keyframes dcq-shimmer{to{transform:translateX(100%)}}
       .dcq-float-err{color:var(--dsw-alias-state-error-primary)}
-      .dcq-float-fill{display:block;height:100%;border-radius:999px;transition:width .5s ease;box-shadow:0 0 8px rgba(18,184,134,.45)}
+      .dcq-float-fill{display:block;height:100%;border-radius:999px;transition:width .5s ease;box-shadow:0 0 6px color-mix(in srgb, var(--dsw-alias-label-primary) 22%, transparent)}
       .dcq-float-pct{min-width:27px;text-align:right;color:var(--dsw-alias-label-secondary);font-size:10px}
       .dcq-float-credit{font-size:11px;color:var(--dsw-alias-label-secondary);font-variant-numeric:tabular-nums;white-space:nowrap}
-      .dcq-float-dot{width:5px;height:5px;border-radius:50%;background:var(--dsw-alias-brand-primary);flex:none;transition:opacity .2s;box-shadow:0 0 8px rgba(18,184,134,.6)}
+      .dcq-float-dot{width:5px;height:5px;border-radius:50%;background:var(--dsw-alias-brand-primary);flex:none;transition:opacity .2s;box-shadow:0 0 6px color-mix(in srgb, var(--dsw-alias-label-primary) 30%, transparent)}
       .dcq-float-dot[data-loading="1"]{animation:dcq-pulse 1s ease-in-out infinite}
       @keyframes dcq-pulse{0%,100%{opacity:1}50%{opacity:.25}}
 
@@ -419,6 +434,7 @@ window.__ModuleLoader__.load({
       lastFetch: 0,
       popoverOpen: false,
       widgetHidden: false,
+      miniCapsule: false,
       planOverride: '',
       position: null,
       capsuleRect: null,
@@ -455,6 +471,7 @@ window.__ModuleLoader__.load({
     }
 
     store.widgetHidden = readLocal(HIDDEN_KEY) === true
+    store.miniCapsule = readLocal(MINI_KEY) === true
     store.position = readLocal(POS_KEY)
     store.planOverride = readLocal(PLAN_KEY) || ''
     store.refreshMs = clampRefresh(readLocal(REFRESH_KEY) ?? REFRESH_DEFAULT)
@@ -1203,6 +1220,31 @@ window.__ModuleLoader__.load({
                 hidden ? h('div', { className: 'dcq-note', style: { marginTop: 6 } }, tr('widgetHint')) : null,
                 h(
                   'div',
+                  { className: 'dcq-row', style: { padding: '2px 0', marginTop: 10 } },
+                  h('span', { className: 'dcq-row-label' }, tr('widgetMini')),
+                  h(
+                    'button',
+                    {
+                      type: 'button',
+                      className: 'dcq-toggle',
+                      role: 'switch',
+                      'data-mini-toggle': '1',
+                      'aria-checked': store.miniCapsule ? 'true' : 'false',
+                      'aria-label': tr('widgetMini'),
+                      onClick: () => {
+                        const nextMini = !store.miniCapsule
+                        store.set({ miniCapsule: nextMini })
+                        writeLocal(MINI_KEY, nextMini)
+                      },
+                    },
+                    h('span', { className: 'dcq-toggle-thumb' }),
+                  ),
+                ),
+                store.miniCapsule
+                  ? h('div', { className: 'dcq-note', style: { marginTop: 6 } }, tr('widgetMiniHint'))
+                  : null,
+                h(
+                  'div',
                   { style: { marginTop: 14, borderTop: '1px solid var(--dsw-alias-border-l1)', paddingTop: 12 } },
                   h(
                     'div',
@@ -1250,6 +1292,10 @@ window.__ModuleLoader__.load({
     function FloatingWidget(props) {
       const tr = typeof props.t === 'function' ? props.t : fallbackT
       const now = useNow(30000)
+      const mini = store.miniCapsule
+      // Compact mode rotates the single bar through the gauges, so it needs its
+      // own faster beat; the full pill keeps the 30s countdown tick.
+      const cycleNow = useNow(mini ? MINI_CYCLE_MS : 60000)
       useStore()
       const [rect, setRect] = React.useState(null)
       const [dragging, setDragging] = React.useState(false)
@@ -1343,6 +1389,48 @@ window.__ModuleLoader__.load({
         win && win.resetAt ? Math.min(100, Math.max(0, ((now - (win.resetAt - windowMs)) / windowMs) * 100)) : null
       const fiveTime = timePct(five, 5 * 3600000)
       const weekTime = timePct(week, 7 * 86400000)
+      const creditTime = (() => {
+        const summary = report && report.summary
+        if (!summary || !summary.periodStart || !summary.periodEnd) return null
+        const start = Date.parse(summary.periodStart)
+        const end = Date.parse(summary.periodEnd)
+        if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return null
+        return Math.min(100, Math.max(0, ((now - start) / (end - start)) * 100))
+      })()
+
+      // Compact mode: one bar, always telling you which gauge it is showing.
+      const gauges = []
+      if (five) gauges.push({ key: '5h', tag: '5h', percent: five.percent, time: fiveTime })
+      if (week) gauges.push({ key: 'W', tag: 'W', percent: week.percent, time: weekTime })
+      if (credit) gauges.push({ key: 'M', tag: 'M', percent: credit.percent, time: creditTime })
+      const gauge = gauges.length ? gauges[Math.floor(cycleNow / MINI_CYCLE_MS) % gauges.length] : null
+      const miniRow = h(
+        'span',
+        { className: 'dcq-float-row dcq-float-mini' },
+        h('span', { className: 'dcq-float-tag' }, gauge ? gauge.tag : '—'),
+        h(
+          'span',
+          { className: 'dcq-float-track' },
+          gauge
+            ? h('span', {
+                className: 'dcq-float-fill',
+                'data-tone': toneName(gauge.percent),
+                style: {
+                  width: `${Math.max(3, Math.min(100, gauge.percent || 0))}%`,
+                  background: fillColor(gauge.percent),
+                },
+              })
+            : null,
+          gauge && gauge.time !== null && gauge.time !== undefined
+            ? h('span', {
+                className: 'dcq-float-time',
+                'data-ahead': (gauge.percent || 0) - gauge.time > 1 ? '1' : '0',
+                style: { left: `${gauge.time}%` },
+              })
+            : null,
+        ),
+        h('span', { className: 'dcq-float-pct' }, gauge ? `${Math.round(gauge.percent || 0)}%` : '—'),
+      )
 
       const popPos = (() => {
         if (!store.popoverOpen || !capsule.current) return null
@@ -1372,6 +1460,7 @@ window.__ModuleLoader__.load({
             title: tr('drag'),
             'data-dragging': dragging ? '1' : '0',
             'data-severity': severity,
+            'data-mini': mini ? '1' : '0',
             onPointerDown,
             onPointerMove,
             onPointerUp,
@@ -1382,11 +1471,12 @@ window.__ModuleLoader__.load({
               }
             },
           },
-          h('span', { className: 'dcq-float-mark' }, h(Icon, { size: 26 })),
+          mini ? null : h('span', { className: 'dcq-float-mark' }, h(Icon, { size: 26 })),
           h(
             'span',
             { className: 'dcq-float-bars' },
-            five
+            mini ? miniRow : null,
+            !mini && five
               ? h(
                   'span',
                   { className: 'dcq-float-row' },
@@ -1400,7 +1490,7 @@ window.__ModuleLoader__.load({
                   h('span', { className: 'dcq-float-pct' }, `${Math.round(five.percent || 0)}%`),
                 )
               : null,
-            week
+            !mini && week
               ? h(
                   'span',
                   { className: 'dcq-float-row' },
@@ -1414,14 +1504,14 @@ window.__ModuleLoader__.load({
                   h('span', { className: 'dcq-float-pct' }, `${Math.round(week.percent || 0)}%`),
                 )
               : null,
-            !five && !week && credit
+            !mini && !five && !week && credit
               ? h(
                   'span',
                   { className: 'dcq-float-row' },
                   h('span', { className: 'dcq-float-credit' }, `${credits(credit.remaining)} / ${credits(credit.total)}`),
                 )
               : null,
-            !five && !week && !credit
+            !mini && !five && !week && !credit
               ? store.error
                 ? h(
                     'span',

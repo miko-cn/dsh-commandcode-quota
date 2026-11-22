@@ -340,6 +340,34 @@ for (const expected of ['5h', 'W', '5%']) {
 const capsuleTicks = findNodes(floatTree, (node) => node.props && node.props.className === 'dcq-float-time')
 if (capsuleTicks.length !== 2) throw new Error(`expected time ticks on both capsule bars, got ${capsuleTicks.length}`)
 
+// Compact capsule: a Settings switch swaps the two-row pill for one bar that
+// rotates through 5h / W / M, keeps the status dot and drops the icon.
+const miniToggle = findNodes(paint(settings), (node) => node.props && node.props['data-mini-toggle'] === '1')[0]
+if (!miniToggle) throw new Error('compact-capsule switch not found')
+if (miniToggle.props['aria-checked'] !== 'false') throw new Error('compact capsule should start off')
+miniToggle.props.onClick()
+await new Promise((resolve) => setTimeout(resolve, 30))
+const miniTree = paint(floating)
+const miniPill = findNodes(miniTree, (node) => node.props && node.props.className === 'dcq-float')[0]
+if (miniPill.props['data-mini'] !== '1') throw new Error('capsule did not switch to compact mode')
+if (findNodes(miniTree, (node) => node.props && node.props.className === 'dcq-float-mark').length) {
+  throw new Error('compact capsule still renders the icon')
+}
+const miniRows = findNodes(miniTree, (node) => node.props && String(node.props.className || '').includes('dcq-float-row'))
+if (miniRows.length !== 1) throw new Error(`compact capsule has ${miniRows.length} rows, expected 1`)
+const miniTag = collectText(findNodes(miniTree, (node) => node.props && node.props.className === 'dcq-float-tag')[0])
+if (!['5h', 'W', 'M'].includes(miniTag.trim())) throw new Error(`compact capsule labels the gauge "${miniTag}", expected 5h / W / M`)
+if (!findNodes(miniTree, (node) => node.props && node.props.className === 'dcq-float-dot').length) {
+  throw new Error('compact capsule lost the status dot')
+}
+const miniCss = created[0].textContent || ''
+if (!miniCss.includes('[data-mini="1"]')) throw new Error('compact capsule styles are missing')
+miniToggle.props.onClick()
+await new Promise((resolve) => setTimeout(resolve, 30))
+if (findNodes(paint(floating), (node) => node.props && node.props['data-mini'] === '1').length) {
+  throw new Error('capsule did not switch back to the full pill')
+}
+
 const capsule = findNodes(floatTree, (node) => node.props && node.props.className === 'dcq-float')[0]
 if (!capsule) throw new Error('capsule element not found')
 
