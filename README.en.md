@@ -113,6 +113,7 @@ The plugin detects your plan automatically (Go / GOAT / Pro / Max / Ultra / Team
 - loads on startup (skeleton bars first, never silently empty);
 - refreshes when you switch back to DSH;
 - turns amber at 70% and red at 90% for credits or either window;
+- turn on "Compact capsule" in Settings for a smaller pill (about 119 × 36) with just the icon and the two bars; clicking, dragging and the panel behave the same;
 - hide it from the Settings page if you prefer.
 
 ## FAQ
