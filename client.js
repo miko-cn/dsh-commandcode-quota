@@ -359,7 +359,10 @@ window.__ModuleLoader__.load({
       .dcq-float-time[data-ahead="1"]{background:var(--dsw-alias-state-error-primary)}
       /* Compact capsule: no icon, no labels, no percentages — just the two
          window bars, a little shorter and narrower. */
-      .dcq-float[data-mini="1"]{padding:7px 9px;border-radius:15.5px;gap:0}
+      .dcq-float[data-mini="1"]{padding:7px 9px;border-radius:18px;gap:6px}
+      /* Compact capsule keeps a small logo (≈0.56 of the pill height) and the
+         severity dot; only the labels and percentages are gone. */
+      .dcq-float[data-mini="1"] .dcq-float-mark{width:20px;height:20px}
       .dcq-float[data-mini="1"] .dcq-float-bars{min-width:0;gap:5px}
       /* Round caps on both ends of both rows. The floor keeps a 1-3% fill from
          collapsing into a square sliver: at 5px tall the cap needs ~6px. */
@@ -1471,7 +1474,7 @@ window.__ModuleLoader__.load({
               }
             },
           },
-          mini ? null : h('span', { className: 'dcq-float-mark' }, h(Icon, { size: 26 })),
+          h('span', { className: 'dcq-float-mark' }, h(Icon, { size: mini ? 20 : 26 })),
           h(
             'span',
             { className: 'dcq-float-bars' },
@@ -1537,9 +1540,9 @@ window.__ModuleLoader__.load({
                   ]
               : null,
           ),
-          // Compact mode is bars only: the status dot goes too, so the pill is
-          // two shapes and nothing else.
-          mini ? null : h('span', { className: 'dcq-float-dot', 'data-loading': store.refreshing || store.loading ? '1' : '0' }),
+          // The severity dot rides along in compact mode too, so the pill still
+          // warns at 70% / 90% without labels.
+          h('span', { className: 'dcq-float-dot', 'data-loading': store.refreshing || store.loading ? '1' : '0' }),
         ),
         store.popoverOpen && popPos
           ? h(
