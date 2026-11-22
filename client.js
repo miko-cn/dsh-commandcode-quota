@@ -266,7 +266,9 @@ window.__ModuleLoader__.load({
       .dcq-spot{margin-top:10px;padding:10px 12px;border-radius:12px;
         border:1px solid color-mix(in srgb, var(--dsw-alias-brand-primary) 26%, transparent);
         background:color-mix(in srgb, var(--dsw-alias-brand-primary) 7%, transparent)}
-      .dcq-tip{display:flex;align-items:flex-start;gap:6px;margin-top:10px;padding:8px 10px;border-radius:10px;
+      /* The popover is a flex column with its own 9px gap, so the tip and the
+         footer must not add margins of their own or the rhythm doubles. */
+      .dcq-tip{display:flex;align-items:center;gap:6px;padding:8px 10px;border-radius:10px;
         border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);
         font-size:11px;line-height:1.45;color:var(--dsw-alias-label-secondary)}
       .dcq-tip b{color:var(--dsw-alias-label-primary);font-weight:700}
@@ -438,7 +440,7 @@ window.__ModuleLoader__.load({
       .dcq-pop .dcq-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
       .dcq-pop .dcq-stat{padding:7px 4px}
       .dcq-pop .dcq-stat-num{font-size:14px}
-      .dcq-pop-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:9px;font-size:10.5px;color:var(--dsw-alias-label-secondary)}
+      .dcq-pop-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10.5px;color:var(--dsw-alias-label-secondary)}
       @media (prefers-reduced-motion: reduce){.dcq-bar-fill{transition:none}.dcq-spin{animation:none}}
     `
 
