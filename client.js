@@ -45,9 +45,6 @@ window.__ModuleLoader__.load({
     const POS_KEY = 'dcq.capsule.position'
     const HIDDEN_KEY = 'dcq.capsule.hidden'
     const MINI_KEY = 'dcq.capsule.mini'
-    // In compact mode the single bar rotates through the three gauges; four
-    // seconds is slow enough to read and fast enough to notice the rotation.
-    const MINI_CYCLE_MS = 4000
     const PLAN_KEY = 'dcq.plan.override'
     // Background refresh of the floating capsule. Minutes, clamped so the
     // upstream 4-request round is never hammered harder than once a minute.
@@ -130,7 +127,7 @@ window.__ModuleLoader__.load({
       refreshUnit: '分钟',
       refreshHint: '浮窗后台多久拉一次数据，改完立即生效',
       widgetMini: '紧凑胶囊',
-      widgetMiniHint: '不显示图标，只留一行进度条，循环显示 5 小时 / 每周 / 套餐额度',
+      widgetMiniHint: '不显示图标、标签和百分比，只留 5 小时 / 每周两条进度条',
       collapsed: '收起',
       expand: '展开',
       starTitle: '喜欢这个插件？',
@@ -212,7 +209,7 @@ window.__ModuleLoader__.load({
       refreshUnit: 'min',
       refreshHint: 'How often the widget fetches in the background; applies immediately',
       widgetMini: 'Compact capsule',
-      widgetMiniHint: 'No icon: one bar that cycles through the 5-hour, weekly and credit usage',
+      widgetMiniHint: 'No icon, labels or percentages: just the 5-hour and weekly bars',
       collapsed: 'Collapse',
       expand: 'Expand',
       autoRefresh: 'This page refreshes every minute',
@@ -360,13 +357,11 @@ window.__ModuleLoader__.load({
       .dcq-float-time{position:absolute;z-index:2;top:-2px;bottom:-2px;width:2px;margin-left:-1px;border-radius:1px;
         background:var(--dsw-alias-state-business-primary);pointer-events:none}
       .dcq-float-time[data-ahead="1"]{background:var(--dsw-alias-state-error-primary)}
-      /* Compact capsule: no icon, one row, a little shorter and narrower. */
-      .dcq-float[data-mini="1"]{padding:6px 10px 6px 11px;border-radius:12px;gap:8px}
-      .dcq-float[data-mini="1"] .dcq-float-bars{min-width:0;gap:0}
-      .dcq-float[data-mini="1"] .dcq-float-row{gap:5px}
-      .dcq-float[data-mini="1"] .dcq-float-tag{width:14px;font-size:9px}
-      .dcq-float[data-mini="1"] .dcq-float-track{flex:none;width:76px;height:6px}
-      .dcq-float[data-mini="1"] .dcq-float-pct{min-width:24px;font-size:9.5px}
+      /* Compact capsule: no icon, no labels, no percentages — just the two
+         window bars, a little shorter and narrower. */
+      .dcq-float[data-mini="1"]{padding:2px 8px;border-radius:11px;gap:0}
+      .dcq-float[data-mini="1"] .dcq-float-bars{min-width:0;gap:3px}
+      .dcq-float[data-mini="1"] .dcq-float-track{flex:none;width:90px;height:8px}
       .dcq-float-track.dcq-skel{position:relative;overflow:hidden;background:var(--dsw-alias-bg-layer-2)}
       .dcq-float-track.dcq-skel::after{content:"";position:absolute;inset:0;transform:translateX(-100%);
         background:linear-gradient(90deg, transparent, rgba(255,255,255,.24), transparent);animation:dcq-shimmer 1.2s ease-in-out infinite}
@@ -1293,9 +1288,6 @@ window.__ModuleLoader__.load({
       const tr = typeof props.t === 'function' ? props.t : fallbackT
       const now = useNow(30000)
       const mini = store.miniCapsule
-      // Compact mode rotates the single bar through the gauges, so it needs its
-      // own faster beat; the full pill keeps the 30s countdown tick.
-      const cycleNow = useNow(mini ? MINI_CYCLE_MS : 60000)
       useStore()
       const [rect, setRect] = React.useState(null)
       const [dragging, setDragging] = React.useState(false)
@@ -1389,48 +1381,51 @@ window.__ModuleLoader__.load({
         win && win.resetAt ? Math.min(100, Math.max(0, ((now - (win.resetAt - windowMs)) / windowMs) * 100)) : null
       const fiveTime = timePct(five, 5 * 3600000)
       const weekTime = timePct(week, 7 * 86400000)
-      const creditTime = (() => {
-        const summary = report && report.summary
-        if (!summary || !summary.periodStart || !summary.periodEnd) return null
-        const start = Date.parse(summary.periodStart)
-        const end = Date.parse(summary.periodEnd)
-        if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return null
-        return Math.min(100, Math.max(0, ((now - start) / (end - start)) * 100))
-      })()
 
-      // Compact mode: one bar, always telling you which gauge it is showing.
-      const gauges = []
-      if (five) gauges.push({ key: '5h', tag: '5h', percent: five.percent, time: fiveTime })
-      if (week) gauges.push({ key: 'W', tag: 'W', percent: week.percent, time: weekTime })
-      if (credit) gauges.push({ key: 'M', tag: 'M', percent: credit.percent, time: creditTime })
-      const gauge = gauges.length ? gauges[Math.floor(cycleNow / MINI_CYCLE_MS) % gauges.length] : null
-      const miniRow = h(
-        'span',
-        { className: 'dcq-float-row dcq-float-mini' },
-        h('span', { className: 'dcq-float-tag' }, gauge ? gauge.tag : '—'),
+      // Compact mode: the two window bars and nothing else. No label on the
+      // left, no percentage on the right — it is meant to be read at a glance,
+      // and the popover carries the numbers. Nothing rotates any more: both
+      // bars are always on screen, so a swap would only be visual noise.
+      const miniBar = (key, win, time) =>
         h(
           'span',
-          { className: 'dcq-float-track' },
-          gauge
-            ? h('span', {
-                className: 'dcq-float-fill',
-                'data-tone': toneName(gauge.percent),
-                style: {
-                  width: `${Math.max(3, Math.min(100, gauge.percent || 0))}%`,
-                  background: fillColor(gauge.percent),
-                },
-              })
-            : null,
-          gauge && gauge.time !== null && gauge.time !== undefined
-            ? h('span', {
-                className: 'dcq-float-time',
-                'data-ahead': (gauge.percent || 0) - gauge.time > 1 ? '1' : '0',
-                style: { left: `${gauge.time}%` },
-              })
-            : null,
-        ),
-        h('span', { className: 'dcq-float-pct' }, gauge ? `${Math.round(gauge.percent || 0)}%` : '—'),
-      )
+          { key, className: 'dcq-float-row' },
+          h(
+            'span',
+            { className: 'dcq-float-track' },
+            h('span', {
+              className: 'dcq-float-fill',
+              'data-tone': toneName(win.percent),
+              style: {
+                width: `${Math.max(3, Math.min(100, win.percent || 0))}%`,
+                background: fillColor(win.percent),
+              },
+            }),
+            time === null || time === undefined
+              ? null
+              : h('span', {
+                  className: 'dcq-float-time',
+                  'data-ahead': (win.percent || 0) - time > 1 ? '1' : '0',
+                  style: { left: `${time}%` },
+                }),
+          ),
+        )
+      const miniRows = []
+      if (five) miniRows.push(miniBar('5h', five, fiveTime))
+      if (week) miniRows.push(miniBar('W', week, weekTime))
+      // Nothing to draw yet (first load, or a plan without windows): keep the
+      // shape of the pill instead of collapsing it into an empty box.
+      if (!miniRows.length) {
+        miniRows.push(
+          store.error
+            ? h(
+                'span',
+                { key: 'error', className: 'dcq-float-row' },
+                h('span', { className: 'dcq-float-credit dcq-float-err' }, tr('shortError')),
+              )
+            : h('span', { key: 'skeleton', className: 'dcq-float-row' }, h('span', { className: 'dcq-float-track dcq-skel' })),
+        )
+      }
 
       const popPos = (() => {
         if (!store.popoverOpen || !capsule.current) return null
@@ -1475,7 +1470,7 @@ window.__ModuleLoader__.load({
           h(
             'span',
             { className: 'dcq-float-bars' },
-            mini ? miniRow : null,
+            mini ? miniRows : null,
             !mini && five
               ? h(
                   'span',
@@ -1537,7 +1532,9 @@ window.__ModuleLoader__.load({
                   ]
               : null,
           ),
-          h('span', { className: 'dcq-float-dot', 'data-loading': store.refreshing || store.loading ? '1' : '0' }),
+          // Compact mode is bars only: the status dot goes too, so the pill is
+          // two shapes and nothing else.
+          mini ? null : h('span', { className: 'dcq-float-dot', 'data-loading': store.refreshing || store.loading ? '1' : '0' }),
         ),
         store.popoverOpen && popPos
           ? h(

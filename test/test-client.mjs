@@ -340,8 +340,9 @@ for (const expected of ['5h', 'W', '5%']) {
 const capsuleTicks = findNodes(floatTree, (node) => node.props && node.props.className === 'dcq-float-time')
 if (capsuleTicks.length !== 2) throw new Error(`expected time ticks on both capsule bars, got ${capsuleTicks.length}`)
 
-// Compact capsule: a Settings switch swaps the two-row pill for one bar that
-// rotates through 5h / W / M, keeps the status dot and drops the icon.
+// Compact capsule: a Settings switch swaps the two-row pill for a smaller pill
+// that keeps only the 5-hour and weekly bars — no icon, no labels, no
+// percentages, and no rotating gauge.
 const miniToggle = findNodes(paint(settings), (node) => node.props && node.props['data-mini-toggle'] === '1')[0]
 if (!miniToggle) throw new Error('compact-capsule switch not found')
 if (miniToggle.props['aria-checked'] !== 'false') throw new Error('compact capsule should start off')
@@ -354,11 +355,25 @@ if (findNodes(miniTree, (node) => node.props && node.props.className === 'dcq-fl
   throw new Error('compact capsule still renders the icon')
 }
 const miniRows = findNodes(miniTree, (node) => node.props && String(node.props.className || '').includes('dcq-float-row'))
-if (miniRows.length !== 1) throw new Error(`compact capsule has ${miniRows.length} rows, expected 1`)
-const miniTag = collectText(findNodes(miniTree, (node) => node.props && node.props.className === 'dcq-float-tag')[0])
-if (!['5h', 'W', 'M'].includes(miniTag.trim())) throw new Error(`compact capsule labels the gauge "${miniTag}", expected 5h / W / M`)
-if (!findNodes(miniTree, (node) => node.props && node.props.className === 'dcq-float-dot').length) {
-  throw new Error('compact capsule lost the status dot')
+if (miniRows.length !== 2) throw new Error(`compact capsule has ${miniRows.length} rows, expected 2`)
+if (findNodes(miniTree, (node) => node.props && node.props.className === 'dcq-float-tag').length) {
+  throw new Error('compact capsule still renders a gauge label')
+}
+if (findNodes(miniTree, (node) => node.props && node.props.className === 'dcq-float-pct').length) {
+  throw new Error('compact capsule still renders a percentage')
+}
+const miniTracks = findNodes(miniTree, (node) => node.props && String(node.props.className || '').includes('dcq-float-track'))
+if (miniTracks.length !== 2) throw new Error(`compact capsule has ${miniTracks.length} bars, expected 2`)
+for (const track of miniTracks) {
+  if (!findNodes(track, (node) => node.props && node.props.className === 'dcq-float-fill').length) {
+    throw new Error('compact capsule bar has no fill')
+  }
+}
+if (findNodes(miniTree, (node) => node.props && node.props.className === 'dcq-float-dot').length) {
+  throw new Error('compact capsule must not render the status dot')
+}
+if (String(created[0].textContent || '').includes('dcq-float-mini')) {
+  throw new Error('compact capsule still carries the rotating-gauge animation class')
 }
 const miniCss = created[0].textContent || ''
 if (!miniCss.includes('[data-mini="1"]')) throw new Error('compact capsule styles are missing')
