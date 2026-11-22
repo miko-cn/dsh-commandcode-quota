@@ -359,9 +359,10 @@ window.__ModuleLoader__.load({
       .dcq-float-time[data-ahead="1"]{background:var(--dsw-alias-state-error-primary)}
       /* Compact capsule: no icon, no labels, no percentages — just the two
          window bars, a little shorter and narrower. */
-      .dcq-float[data-mini="1"]{padding:2px 8px;border-radius:11px;gap:0}
-      .dcq-float[data-mini="1"] .dcq-float-bars{min-width:0;gap:3px}
-      .dcq-float[data-mini="1"] .dcq-float-track{flex:none;width:90px;height:8px}
+      .dcq-float[data-mini="1"]{padding:7px 9px;border-radius:15.5px;gap:0}
+      .dcq-float[data-mini="1"] .dcq-float-bars{min-width:0;gap:5px}
+      .dcq-float[data-mini="1"] .dcq-float-track{flex:none;width:90px;height:5px}
+      .dcq-float[data-mini="1"] .dcq-float-time{top:-1px;bottom:-1px}
       .dcq-float-track.dcq-skel{position:relative;overflow:hidden;background:var(--dsw-alias-bg-layer-2)}
       .dcq-float-track.dcq-skel::after{content:"";position:absolute;inset:0;transform:translateX(-100%);
         background:linear-gradient(90deg, transparent, rgba(255,255,255,.24), transparent);animation:dcq-shimmer 1.2s ease-in-out infinite}
