@@ -315,6 +315,16 @@ if (starButton.props.href !== 'https://github.com/miko-cn/dsh-commandcode-quota'
 
 // Widget card: a DSH-shaped switch for visibility and a slider for the
 // capsule's background refresh interval in whole minutes (1..30).
+// It sits right under the account card, above the credit numbers, so the mini
+// capsule is the first thing a reader sees rather than the last.
+const settingsTextFlat = collectText(settingsTree)
+const miniAt = settingsTextFlat.indexOf('紧凑胶囊')
+const creditAt = settingsTextFlat.indexOf('套餐额度')
+if (miniAt === -1) throw new Error('mini capsule row not rendered')
+if (creditAt === -1) throw new Error('credits section not rendered')
+if (!(miniAt < creditAt)) throw new Error(`floating-widget card should precede the credits card (mini at ${miniAt}, credits at ${creditAt})`)
+if (!settingsTextFlat.includes('NEW')) throw new Error('the floating-widget card is missing its NEW badge')
+if (!settingsTextFlat.includes('只留图标和 5 小时 / 每周两条进度条')) throw new Error('mini capsule hint should stay visible even while mini mode is off')
 const widgetToggle = findNodes(settingsTree, (node) => node.tag === 'button' && node.props && node.props.className === 'dcq-toggle')[0]
 if (!widgetToggle) throw new Error('floating-widget toggle not found')
 if (widgetToggle.props['aria-checked'] !== 'true') throw new Error('floating-widget toggle should start on')
@@ -432,6 +442,16 @@ console.log('popover text:', popText)
 for (const expected of ['在 Studio 打开', '套餐额度', '5 小时']) {
   if (!popText.includes(expected)) throw new Error(`popover is missing ${expected}`)
 }
+// The popover carries a one-line pointer to the mini capsule, and that pointer
+// retires itself once mini mode is on (no dismissed flag, no permanent nag).
+if (!popText.includes('迷你胶囊')) throw new Error('popover is missing the mini-capsule tip')
+const tipToggle = findNodes(paint(settings), (node) => node.props && node.props['data-mini-toggle'] === '1')[0]
+if (!tipToggle) throw new Error('compact-capsule switch not found while checking the tip')
+tipToggle.props.onClick()
+await new Promise((resolve) => setTimeout(resolve, 30))
+if (collectText(paint(floating)).includes('迷你胶囊')) throw new Error('mini-capsule tip should disappear once mini mode is on')
+tipToggle.props.onClick()
+await new Promise((resolve) => setTimeout(resolve, 30))
 const backdrop = findNodes(popTree, (node) => node.props && node.props.style && node.props.style.zIndex === 2147482999)[0]
 if (!backdrop) throw new Error('popover backdrop is missing its top-layer z-index')
 

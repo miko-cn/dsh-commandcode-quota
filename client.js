@@ -128,6 +128,8 @@ window.__ModuleLoader__.load({
       refreshHint: '浮窗后台多久拉一次数据，改完立即生效',
       widgetMini: '紧凑胶囊',
       widgetMiniHint: '只留图标和 5 小时 / 每周两条进度条，不显示标签和百分比',
+      badgeNew: 'NEW',
+      miniTip: '迷你胶囊：在 设置 → 浮窗 中开启',
       collapsed: '收起',
       expand: '展开',
       starTitle: '喜欢这个插件？',
@@ -210,6 +212,8 @@ window.__ModuleLoader__.load({
       refreshHint: 'How often the widget fetches in the background; applies immediately',
       widgetMini: 'Compact capsule',
       widgetMiniHint: 'Just the icon and the 5-hour and weekly bars, without labels or percentages',
+      badgeNew: 'NEW',
+      miniTip: 'Mini capsule: turn it on under Settings → floating widget',
       collapsed: 'Collapse',
       expand: 'Expand',
       autoRefresh: 'This page refreshes every minute',
@@ -255,6 +259,17 @@ window.__ModuleLoader__.load({
       .dcq-stat-lbl{font-size:10px;color:var(--dsw-alias-label-secondary);margin-top:3px;letter-spacing:.4px}
       .dcq-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.3px;
         color:var(--dsw-alias-brand-primary);border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-2)}
+      /* New-option badge: the mini capsule is easy to miss, so the floating card
+         is now first on the page and carries a filled badge. */
+      .dcq-new{padding:1px 7px;border-radius:999px;font-size:9.5px;font-weight:800;letter-spacing:.7px;line-height:1.5;
+        background:var(--dsw-alias-brand-primary);color:var(--dsw-alias-bg-base)}
+      .dcq-spot{margin-top:10px;padding:10px 12px;border-radius:12px;
+        border:1px solid color-mix(in srgb, var(--dsw-alias-brand-primary) 26%, transparent);
+        background:color-mix(in srgb, var(--dsw-alias-brand-primary) 7%, transparent)}
+      .dcq-tip{display:flex;align-items:flex-start;gap:6px;margin-top:10px;padding:8px 10px;border-radius:10px;
+        border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);
+        font-size:11px;line-height:1.45;color:var(--dsw-alias-label-secondary)}
+      .dcq-tip b{color:var(--dsw-alias-label-primary);font-weight:700}
       .dcq-note{font-size:11.5px;color:var(--dsw-alias-label-secondary);line-height:1.55}
       .dcq-link{color:var(--dsw-alias-brand-primary);text-decoration:none;font-weight:600;font-size:12px}
       .dcq-link:hover{text-decoration:underline}
@@ -1157,6 +1172,101 @@ window.__ModuleLoader__.load({
       const hidden = store.widgetHidden
       const refreshMinutes = Math.round(store.refreshMs / 60000)
 
+      // The floating-widget card sits right under the account card: the mini
+      // capsule is a new, easy-to-miss option, so it goes above the numbers
+      // instead of at the bottom of the page.
+      const widgetCard = h(
+        'div',
+        { className: 'dcq-card' },
+        h(
+          'div',
+          { className: 'dcq-card-head' },
+          h('div', { className: 'dcq-card-title' }, tr('widget')),
+          h('span', { className: 'dcq-new' }, tr('badgeNew')),
+        ),
+        h(
+          'div',
+          { className: 'dcq-row', style: { padding: '2px 0' } },
+          h('span', { className: 'dcq-row-label' }, tr('widgetShow')),
+          h(
+            'button',
+            {
+              type: 'button',
+              className: 'dcq-toggle',
+              role: 'switch',
+              'aria-checked': hidden ? 'false' : 'true',
+              'aria-label': tr('widgetShow'),
+              onClick: () => {
+                const nextHidden = !store.widgetHidden
+                store.set({ widgetHidden: nextHidden })
+                writeLocal(HIDDEN_KEY, nextHidden)
+              },
+            },
+            h('span', { className: 'dcq-toggle-thumb' }),
+          ),
+        ),
+        hidden ? h('div', { className: 'dcq-note', style: { marginTop: 6 } }, tr('widgetHint')) : null,
+        h(
+          'div',
+          { className: 'dcq-spot' },
+          h(
+            'div',
+            { className: 'dcq-row', style: { padding: 0 } },
+            h('span', { className: 'dcq-row-label', style: { fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, tr('widgetMini')),
+            h(
+              'button',
+              {
+                type: 'button',
+                className: 'dcq-toggle',
+                role: 'switch',
+                'data-mini-toggle': '1',
+                'aria-checked': store.miniCapsule ? 'true' : 'false',
+                'aria-label': tr('widgetMini'),
+                onClick: () => {
+                  const nextMini = !store.miniCapsule
+                  store.set({ miniCapsule: nextMini })
+                  writeLocal(MINI_KEY, nextMini)
+                },
+              },
+              h('span', { className: 'dcq-toggle-thumb' }),
+            ),
+          ),
+          h('div', { className: 'dcq-note', style: { marginTop: 6 } }, tr('widgetMiniHint')),
+        ),
+        h(
+          'div',
+          { style: { marginTop: 14, borderTop: '1px solid var(--dsw-alias-border-l1)', paddingTop: 12 } },
+          h(
+            'div',
+            { className: 'dcq-row', style: { padding: 0 } },
+            h('span', { className: 'dcq-row-label' }, tr('widgetRefresh')),
+            h('span', { className: 'dcq-meta dcq-range-value' }, `${refreshMinutes} ${tr('refreshUnit')}`),
+          ),
+          h('input', {
+            type: 'range',
+            className: 'dcq-range',
+            min: 1,
+            max: 10,
+            step: 1,
+            value: refreshMinutes,
+            'aria-label': tr('widgetRefresh'),
+            style: { '--dcq-fill': `${((refreshMinutes - 1) / 9) * 100}%` },
+            onChange: (event) => {
+              const next = clampRefresh(Number(event.target.value) * 60000)
+              store.set({ refreshMs: next })
+              writeLocal(REFRESH_KEY, next)
+            },
+          }),
+          h(
+            'div',
+            { className: 'dcq-range-scale' },
+            h('span', null, '1'),
+            h('span', null, '10'),
+          ),
+          h('div', { className: 'dcq-note', style: { fontSize: 10.5, marginTop: 4 } }, tr('refreshHint')),
+        ),
+      )
+
       return h(
         'div',
         { className: 'dcq-page' },
@@ -1184,6 +1294,7 @@ window.__ModuleLoader__.load({
             h(LastUpdated, { tr, now, refreshing: store.refreshing, onRefresh: () => loadReport(true) }),
           ),
         ),
+        widgetCard,
         !report && store.loading
           ? h('div', { className: 'dcq-state' }, h('div', { className: 'dcq-spin' }), tr('loading'))
           : !report && store.error
@@ -1195,90 +1306,6 @@ window.__ModuleLoader__.load({
               null,
               h(ReportCards, { tr }),
               h(PlanCard, { tr }),
-              h(
-                'div',
-                { className: 'dcq-card' },
-                h('div', { className: 'dcq-card-head' }, h('div', { className: 'dcq-card-title' }, tr('widget'))),
-                h(
-                  'div',
-                  { className: 'dcq-row', style: { padding: '2px 0' } },
-                  h('span', { className: 'dcq-row-label' }, tr('widgetShow')),
-                  h(
-                    'button',
-                    {
-                      type: 'button',
-                      className: 'dcq-toggle',
-                      role: 'switch',
-                      'aria-checked': hidden ? 'false' : 'true',
-                      'aria-label': tr('widgetShow'),
-                      onClick: () => {
-                        const nextHidden = !store.widgetHidden
-                        store.set({ widgetHidden: nextHidden })
-                        writeLocal(HIDDEN_KEY, nextHidden)
-                      },
-                    },
-                    h('span', { className: 'dcq-toggle-thumb' }),
-                  ),
-                ),
-                hidden ? h('div', { className: 'dcq-note', style: { marginTop: 6 } }, tr('widgetHint')) : null,
-                h(
-                  'div',
-                  { className: 'dcq-row', style: { padding: '2px 0', marginTop: 10 } },
-                  h('span', { className: 'dcq-row-label' }, tr('widgetMini')),
-                  h(
-                    'button',
-                    {
-                      type: 'button',
-                      className: 'dcq-toggle',
-                      role: 'switch',
-                      'data-mini-toggle': '1',
-                      'aria-checked': store.miniCapsule ? 'true' : 'false',
-                      'aria-label': tr('widgetMini'),
-                      onClick: () => {
-                        const nextMini = !store.miniCapsule
-                        store.set({ miniCapsule: nextMini })
-                        writeLocal(MINI_KEY, nextMini)
-                      },
-                    },
-                    h('span', { className: 'dcq-toggle-thumb' }),
-                  ),
-                ),
-                store.miniCapsule
-                  ? h('div', { className: 'dcq-note', style: { marginTop: 6 } }, tr('widgetMiniHint'))
-                  : null,
-                h(
-                  'div',
-                  { style: { marginTop: 14, borderTop: '1px solid var(--dsw-alias-border-l1)', paddingTop: 12 } },
-                  h(
-                    'div',
-                    { className: 'dcq-row', style: { padding: 0 } },
-                    h('span', { className: 'dcq-row-label' }, tr('widgetRefresh')),
-                    h('span', { className: 'dcq-meta dcq-range-value' }, `${refreshMinutes} ${tr('refreshUnit')}`),
-                  ),
-                  h('input', {
-                    type: 'range',
-                    className: 'dcq-range',
-                    min: 1,
-                    max: 10,
-                    step: 1,
-                    value: refreshMinutes,
-                    'aria-label': tr('widgetRefresh'),
-                    style: { '--dcq-fill': `${((refreshMinutes - 1) / 9) * 100}%` },
-                    onChange: (event) => {
-                      const next = clampRefresh(Number(event.target.value) * 60000)
-                      store.set({ refreshMs: next })
-                      writeLocal(REFRESH_KEY, next)
-                    },
-                  }),
-                  h(
-                    'div',
-                    { className: 'dcq-range-scale' },
-                    h('span', null, '1'),
-                    h('span', null, '10'),
-                  ),
-                  h('div', { className: 'dcq-note', style: { fontSize: 10.5, marginTop: 4 } }, tr('refreshHint')),
-                ),
-              ),
               h(KeyCard, { tr }),
               store.error ? h('div', { className: 'dcq-card' }, h('div', { className: 'dcq-note dcq-err' }, `${tr('error')}: ${store.error}`)) : null,
               h(
@@ -1573,6 +1600,17 @@ window.__ModuleLoader__.load({
                     : !report && store.error
                       ? h(ErrorState, { tr, error: store.error, onRetry: () => loadReport(true) })
                       : h(ReportCards, { tr, compact: true }),
+                // One-line pointer to the mini capsule. It disappears on its own
+                // once the user switches mini on, so it never becomes permanent
+                // furniture and needs no dismissed-state flag.
+                store.miniCapsule
+                  ? null
+                  : h(
+                      'div',
+                      { className: 'dcq-tip' },
+                      h('span', { className: 'dcq-new' }, tr('badgeNew')),
+                      h('span', null, tr('miniTip')),
+                    ),
                 h(
                   'div',
                   { className: 'dcq-pop-foot' },
