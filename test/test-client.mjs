@@ -396,6 +396,23 @@ if (!miniCss.includes('[data-mini="1"] .dcq-float-fill{border-radius:999px')) {
 if (!miniCss.includes('[data-mini="1"] .dcq-float-track{') || !miniCss.includes('border-radius:999px')) {
   throw new Error('compact capsule track lost its rounded caps')
 }
+// A true zero draws no fill at all. The old minimum-width floor left a stub
+// that, with no percentage text in compact mode, read as "a little used".
+sampleReport.windows.fiveHour.percent = 0
+sampleReport.windows.fiveHour.used = 0
+const zeroFills = findNodes(paint(floating), (node) => node.props && node.props.className === 'dcq-float-fill')
+if (zeroFills.length !== 2) throw new Error(`expected two compact fills, got ${zeroFills.length}`)
+if (String(zeroFills[0].props.style.width) !== '0%') {
+  throw new Error(`a 0% compact bar fills ${zeroFills[0].props.style.width}, expected 0%`)
+}
+if (String(zeroFills[1].props.style.width) === '0%') throw new Error('the weekly compact bar lost its fill')
+// Sub-1% usage still keeps a visible nub.
+sampleReport.windows.fiveHour.percent = 0.4
+sampleReport.windows.fiveHour.used = 0.06
+const nubFill = findNodes(paint(floating), (node) => node.props && node.props.className === 'dcq-float-fill')[0]
+if (String(nubFill.props.style.width) !== '3%') throw new Error(`a 0.4% compact bar fills ${nubFill.props.style.width}, expected a 3% nub`)
+sampleReport.windows.fiveHour.percent = 5.3
+sampleReport.windows.fiveHour.used = 0.75
 miniToggle.props.onClick()
 await new Promise((resolve) => setTimeout(resolve, 30))
 if (findNodes(paint(floating), (node) => node.props && node.props['data-mini'] === '1').length) {

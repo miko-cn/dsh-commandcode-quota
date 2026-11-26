@@ -391,7 +391,7 @@ window.__ModuleLoader__.load({
       /* Round caps on both ends of both rows. The floor keeps a 1-3% fill from
          collapsing into a square sliver: at 5px tall the cap needs ~6px. */
       .dcq-float[data-mini="1"] .dcq-float-track{flex:none;width:62px;height:5px;border-radius:999px}
-      .dcq-float[data-mini="1"] .dcq-float-fill{border-radius:999px;min-width:6px}
+      .dcq-float[data-mini="1"] .dcq-float-fill{border-radius:999px}
       /* The elapsed-time tick stays a thin line with its own 1.5px rounding. */
       .dcq-float[data-mini="1"] .dcq-float-time{top:-1px;bottom:-1px;width:3px;margin-left:-1.5px;border-radius:1.5px}
       .dcq-float-track.dcq-skel{position:relative;overflow:hidden;background:var(--dsw-alias-bg-layer-2)}
@@ -723,12 +723,20 @@ window.__ModuleLoader__.load({
       return 'ok'
     }
 
-    /** Fill colour: warn is mixed into the track so it stays a muted amber. */
-    function fillColor(percent) {
+    /** Fill colour: warn is mixed into the track so it stays a muted amber. */    function fillColor(percent) {
       if (toneName(percent) === 'warn') {
         return 'color-mix(in srgb, var(--dsw-alias-state-warn-primary) 58%, var(--dsw-alias-bg-layer-2))'
       }
       return toneVar(percent)
+    }
+
+    // A small floor keeps sub-1% usage visible as a nub, but a true zero must
+    // draw nothing: a stub at 0% reads as "a little used" and, in the compact
+    // capsule where no percentage text exists to correct it, it is simply wrong.
+    function fillWidth(percent, floor) {
+      const value = typeof percent === 'number' && Number.isFinite(percent) ? percent : 0
+      if (value <= 0) return '0%'
+      return `${Math.max(floor, Math.min(100, value))}%`
     }
 
     // One bar carries two facts: the fill is usage, the tick is how much of the
@@ -744,7 +752,7 @@ window.__ModuleLoader__.load({
         h('div', {
           className: 'dcq-bar-fill',
           'data-tone': toneName(percent),
-          style: { width: `${Math.max(2, Math.min(100, percent || 0))}%`, background: fillColor(percent) },
+          style: { width: fillWidth(percent, 2), background: fillColor(percent) },
         }),
         time === null
           ? null
@@ -1442,7 +1450,7 @@ window.__ModuleLoader__.load({
               className: 'dcq-float-fill',
               'data-tone': toneName(win.percent),
               style: {
-                width: `${Math.max(3, Math.min(100, win.percent || 0))}%`,
+                width: fillWidth(win.percent, 3),
                 background: fillColor(win.percent),
               },
             }),
@@ -1524,7 +1532,7 @@ window.__ModuleLoader__.load({
                   h(
                     'span',
                     { className: 'dcq-float-track' },
-                    h('span', { className: 'dcq-float-fill', 'data-tone': toneName(five.percent), style: { width: `${Math.max(3, Math.min(100, five.percent || 0))}%`, background: fillColor(five.percent) } }),
+                    h('span', { className: 'dcq-float-fill', 'data-tone': toneName(five.percent), style: { width: fillWidth(five.percent, 3), background: fillColor(five.percent) } }),
                     fiveTime === null ? null : h('span', { className: 'dcq-float-time', 'data-ahead': (five.percent || 0) - fiveTime > 1 ? '1' : '0', style: { left: `${fiveTime}%` } }),
                   ),
                   h('span', { className: 'dcq-float-pct' }, `${Math.round(five.percent || 0)}%`),
@@ -1538,7 +1546,7 @@ window.__ModuleLoader__.load({
                   h(
                     'span',
                     { className: 'dcq-float-track' },
-                    h('span', { className: 'dcq-float-fill', 'data-tone': toneName(week.percent), style: { width: `${Math.max(3, Math.min(100, week.percent || 0))}%`, background: fillColor(week.percent) } }),
+                    h('span', { className: 'dcq-float-fill', 'data-tone': toneName(week.percent), style: { width: fillWidth(week.percent, 3), background: fillColor(week.percent) } }),
                     weekTime === null ? null : h('span', { className: 'dcq-float-time', 'data-ahead': (week.percent || 0) - weekTime > 1 ? '1' : '0', style: { left: `${weekTime}%` } }),
                   ),
                   h('span', { className: 'dcq-float-pct' }, `${Math.round(week.percent || 0)}%`),
